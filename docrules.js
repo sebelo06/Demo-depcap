@@ -37,7 +37,19 @@ export const REASONS = {
   MissingAccommodationProviderId: ['Pièce d’identité de l’hébergeant manquante', 'Joignez la pièce d’identité de la personne qui vous héberge.'],
   MissingAccommodationProviderIdLetter: ['Pièce d’identité et attestation de l’hébergeant manquantes', 'Joignez l’attestation d’hébergement et la pièce d’identité de l’hébergeant.'],
   MissingAccommodationProviderLetter: ['Attestation d’hébergement manquante', 'Joignez une attestation d’hébergement signée par la personne qui vous héberge.'],
+  FullDocumentRequired: ['Document incomplet', 'Envoyez le document en entier : toutes les pages, recto et verso, sans partie coupée.'],
+  MissingProviderProofOfAddress: ['Justificatif de domicile de l’hébergeant manquant', 'Joignez un justificatif de domicile de moins de 3 mois au nom de la personne qui vous héberge.'],
+  MissingProviderProofOfAddressAndIdDocument: ['Justificatif de domicile et pièce d’identité de l’hébergeant manquants', 'Joignez la pièce d’identité de la personne qui vous héberge et un justificatif de domicile de moins de 3 mois à son nom.'],
+  PowerOfAttorneyToSwanRequired: ['Mandat de dépôt manquant ou non conforme', 'Le mandat de dépôt doit être fourni, signé et daté par chaque associé.'],
+  MissingCompanyDomiciliationStatement: ['Attestation de domiciliation manquante', 'Joignez l’attestation de domiciliation de la société, signée par la société de domiciliation.'],
+  HandwrittenOrCertifiedElectronicSignatureRequired: ['Signature non valable', 'Le document doit porter une signature manuscrite ou une signature électronique certifiée. Une signature copiée-collée n’est pas acceptée.'],
+  // Motif de conformité : ne jamais le détailler au client (LCB-FT), notre équipe reprend contact
+  ComplianceReason: ['Document non accepté', 'Notre équipe va vous contacter pour la suite à donner. Vous n’avez rien à faire pour l’instant.'],
+  InvalidDepositBankName: ['Établissement dépositaire incorrect dans les statuts', 'Les statuts doivent mentionner l’établissement dépositaire des fonds indiqué dans votre espace. Corrigez cette mention et renvoyez les statuts signés.'],
+  MissingCompanyProviderRegisterExtract: ['Kbis de la société de domiciliation manquant', 'Joignez l’extrait Kbis de la société de domiciliation et la pièce d’identité de son représentant légal.'],
 };
+// Motifs à ne jamais expliquer au client : pas de redépôt demandé, le support le rappelle
+export const SENSITIVE_REASONS = new Set(['ComplianceReason']);
 
 export const explain = (code, reason) => {
   const [title, fix] = REASONS[code] || ['Document refusé', reason || 'Vérifiez le document et renvoyez-en un conforme.'];

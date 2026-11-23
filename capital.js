@@ -7,7 +7,7 @@ import { randomUUID } from 'node:crypto';
 import { db, all, get, run } from './db.js';
 import { sendMail } from './mailer.js';
 import { isLive, mockCredit } from './swan.js';
-import { RULES, REASONS, explain, precheck, consistency, recordRefusal, refusalStats } from './docrules.js';
+import { RULES, REASONS, SENSITIVE_REASONS, explain, precheck, consistency, recordRefusal, refusalStats } from './docrules.js';
 import * as partnerMail from './swanmail.js';
 import * as threads from './threads.js';
 
@@ -251,6 +251,11 @@ function rules(type, res, prev) {
     }
     if (d.status === 'Refused') {
       const ex = explain(d.reason_code);   // le client reçoit notre consigne ; le commentaire libre de l'analyste reste interne
+      if (SENSITIVE_REASONS.has(d.reason_code)) {      // conformité : aucun motif ni redépôt côté client, le support reprend la main
+        add('document-refuse', who(owner), `${T.label} : notre équipe va vous contacter`, `Bonjour ${firstName(owner.name)},\n\nLe document « ${T.label} » n’a pas pu être accepté. ${ex.fix}`);
+        add('document-refuse', SUPPORT, `[${c.ref}] Refus pour conformité : ${T.label}`, `Dossier ${c.ref} (réf. partenaire ${c.swan_id})\nDocument : ${T.label} (${d.type})\nCode : ${d.reason_code}\nCommentaire de l’analyste : ${d.reason || '(aucun)'}\nNe pas communiquer le motif au client. Voir avec le partenaire la suite à donner, puis rappeler ${owner.name} (${owner.email}).`);
+        return { messages: msgs };
+      }
       add('document-refuse', who(owner), `${T.label} refusé : ${ex.title}`, `Bonjour ${firstName(owner.name)},\n\nLe document « ${T.label} » ne peut pas être accepté.\n\nMotif : ${ex.title}\nComment corriger : ${ex.fix}${d.client_note ? `\n\nPoints à corriger :\n${d.client_note}` : ''}\n\nDéposez une nouvelle version :\n${link('docs')}`);
       if (d.refusals >= 2) add('document-refuse', SUPPORT, `[${c.ref}] 2e refus : ${T.label}`, `Dossier ${c.ref} (réf. partenaire ${c.swan_id})\nDocument : ${T.label} (${d.type}), ${d.refusals} refus.\nCode : ${d.reason_code}\nCommentaire de l’analyste : ${d.reason || '(aucun)'}\nAppeler ${owner.name} (${owner.email}) avant un 3e refus : le partenaire ouvre alors un ticket.`);
       return { messages: msgs };
@@ -434,7 +439,9 @@ export async function uploadDoc(caseId, docId, { filename, size, confirmed, seen
   await storeUpload(caseId, d, filename);
   return view(caseId);
 }
-const canUpload = (c, d) => !DOC_TYPES[d.type].kyc && !DOC_TYPES[d.type].notary && !isGen(d) && ['Pending', 'Refused'].includes(d.status)
+// Refus pour conformité : le client ne redépose pas, l'équipe reprend la main avec le partenaire
+const sensitiveRefusal = (d) => d.status === 'Refused' && SENSITIVE_REASONS.has(d.reason_code);
+const canUpload = (c, d) => !DOC_TYPES[d.type].kyc && !DOC_TYPES[d.type].notary && !isGen(d) && ['Pending', 'Refused'].includes(d.status) && !sensitiveRefusal(d)
   && (d.type === 'RegisterExtract' ? c.status === 'WaitingForRegisterExtract' : !['Completed', 'Canceled'].includes(c.status));
 
 // ---------- Actions « passables » ----------
@@ -454,6 +461,7 @@ export function actions(caseId) {
   if (toSign) for (const s of S) if (!s.signed_at) A(`sign:${s.id}`, 'client', `${s.name} relit et signe les documents générés`, { happy: true });
   for (const d of D) if (isGen(d) && d.status === 'Refused') A(`regenerate:${d.id}`, 'nous', `Corriger et régénérer « ${DOC_TYPES[d.type].label} »`, { happy: true });
   for (const d of D) if (canUpload(c, d)) A(`upload:${d.id}`, 'client', `Déposer « ${DOC_TYPES[d.type].label} » (${sName(d)})`, { happy: true });
+  for (const d of D) if (sensitiveRefusal(d) && !isGen(d)) A(`upload:${d.id}`, 'nous', `Après échange avec le partenaire, déposer une nouvelle version de « ${DOC_TYPES[d.type].label} » (${sName(d)})`, { happy: true });
   for (const s of S) if (s.status === 'WaitingForVerification' && idOf(s)?.status === 'Uploaded') A(`verify:${s.id}`, 'swan', `Vérifier l’identité de ${s.name} et ouvrir son compte de dépôt`, { happy: true });
   for (const d of D) if (d.status === 'Uploaded' && !DOC_TYPES[d.type].notary && d.type !== 'RegisterExtract') {
     if (!DOC_TYPES[d.type].kyc) A(`validate:${d.id}`, 'swan', `Valider « ${DOC_TYPES[d.type].label} » (${sName(d)})`, { happy: true });
@@ -828,6 +836,7 @@ function plan(c, S, D) {
           why: d.status === 'Refused' ? `${explain(d.reason_code).title}. ${d.client_note ? d.client_note.replace(/\n/g, ' ') : explain(d.reason_code).fix}`
             : d.type === 'ArticlesOfIncorporation' ? `Version signée par tous les associés. Elle doit mentionner : ${c.company_name} (${c.legal_form || 'SAS'}), siège ${c.address}, capital de ${eur(c.total_cents)} réparti entre ${S.map((x) => `${x.name} (${eur(x.amount_cents)})`).join(', ')}, fonds déposés auprès de ${DEPOSIT_BANK.name}, ${DEPOSIT_BANK.address}.`
             : d.type === 'RegisterExtract' ? 'Le notaire le contrôle puis vire le capital sur votre compte pro.' : (RULES[t.rule]?.checks || []).slice(0, 2).join(' · ') });
+      else if (sensitiveRefusal(d)) W({ who: 'team', title: `Refus pour conformité : ${t.label}${d.shareholder_id ? ` (${shName(d.shareholder_id)})` : ''}`, docId: d.id, since: since(d), sla: SLA.docCheck, internal: 'Motif à ne pas communiquer : voir avec le partenaire, puis rappeler le client' });
       else if (reviewable(d) && collecting) W({ who: 'team', partner: true, title: `Vérification : ${t.label}${d.shareholder_id ? ` (${shName(d.shareholder_id)})` : ''}`, docId: d.id, since: since(d), sla: SLA.docCheck });
     }
     if (c.status === 'WaitingForAdditionalInformation' && c.info_source === 'email') {
