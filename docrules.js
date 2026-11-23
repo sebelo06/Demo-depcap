@@ -27,7 +27,7 @@ export const REASONS = {
   ExpiredDocument: ['Document trop ancien', 'Fournissez un document plus récent : moins de 3 mois pour un justificatif de domicile ou un Kbis, moins de 6 mois (ou version la plus récente) pour les statuts.'],
   UnacceptableDocument: ['Type de document non conforme', 'Envoyez exactement le type de document demandé. Pour un justificatif de domicile, un relevé bancaire n’est pas accepté : préférez une facture d’énergie, d’internet ou de mobile.'],
   InvalidOrMissingData: ['Nom absent ou illisible', 'Le nom complet doit être visible et lisible. Renvoyez un scan plus net où il apparaît en entier.'],
-  InvalidAddress: ['Adresse différente du dossier', 'L’adresse du document doit être identique à celle déclarée dans le dossier. Corrigez le dossier ou fournissez un document à la bonne adresse.'],
+  InvalidAddress: ['Adresse différente du dossier', 'L’adresse du document doit être celle déclarée dans le dossier. Fournissez un document à cette adresse ou, si l’adresse a changé, signalez-le à notre équipe en répondant à notre email.'],
   CompanyNameMismatch: ['Raison sociale différente du dossier', 'La raison sociale du document doit être identique à celle déclarée. Vérifiez l’orthographe et la forme juridique.'],
   DeclaredAmountMismatch: ['Montant différent de celui déclaré', 'Le montant du document doit correspondre à celui déclaré dans le dossier.'],
   InvalidDocument: ['Document invalide ou format non accepté', 'Envoyez un fichier pdf, png ou jpg valide, non protégé par mot de passe et ouvrable.'],

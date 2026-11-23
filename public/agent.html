@@ -214,7 +214,7 @@ function drawCase(){
   return o?`<q>${esc(o.who.split(' ')[0])} doit ${esc(low(o.title.replace(/votre/g,'son').replace(/^(Remplacer|Déposer) : (.)/,(m,v,x)=>v.toLowerCase()+' son '+x.toLowerCase())))}</q> · bouton Relancer`:'<q>Rien à faire de votre côté</q>'+(p.waiting[0]?` · attend : ${esc(low(p.waiting[0].title))}`:'')})();
  $('#detail').innerHTML=`
  <div class="panel hd">
-  <div class="r1"><div><div class="ad">${esc(c.ref)}${c.address?' · '+esc(c.address):''}</div><h1>${esc(c.company_name)} <span>${esc(c.legal_form||'')} · ${S.length} associé${S.length>1?'s':''}</span></h1></div>
+  <div class="r1"><div><div class="ad">${esc(c.ref)}${c.address?' · '+esc(c.address):''}</div><h1>${esc(c.company_name)} <span>${c.legal_form&&!new RegExp('\\b'+c.legal_form+'$','i').test(c.company_name)?esc(c.legal_form)+' · ':''}${S.length} associé${S.length>1?'s':''}</span></h1></div>
    <div class="fund ${V.funded>=c.total_cents?'ok':''}"><span class="l">Capital reçu</span><b>${capE(V.funded)} <small>sur ${capE(c.total_cents)}</small></b><div class="prog"><i style="width:${pct}%"></i></div></div></div>
   ${tracker(c,[...AI.me,...AI.others].some(i=>i.late))}
   ${nextCard(AI,closed)}

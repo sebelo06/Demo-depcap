@@ -6,7 +6,7 @@
 body{display:block}
 .top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 20px;background:var(--side);color:#fff;flex-wrap:wrap}
 .top .logo{display:flex;align-items:center;gap:8px;font-weight:700}.top .logo i{width:18px;height:18px;border-radius:5px;background:#fff;display:inline-block}
-.as{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--sideink)}.as select{width:auto;padding:6px 10px;font-size:12.5px}
+.as{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:12px;color:var(--sideink);min-width:0;max-width:100%}.as select{width:auto;max-width:100%;min-width:0;padding:6px 10px;font-size:12.5px}
 .wrap{max-width:760px;margin:0 auto;padding:24px 16px 60px}
 .co{margin-bottom:18px}.note{font-size:12px;color:var(--mute);margin:8px 4px 0}
 .co h1{font-size:22px;letter-spacing:-.02em;margin:2px 0 0}
@@ -54,7 +54,7 @@ body{display:block}
 @media(max-width:600px){.st{grid-template-columns:26px 1fr}.when{grid-column:2;text-align:left}.ibanbox{grid-template-columns:1fr}.now{padding:18px}}
 </style></head><body>
 <div class="top"><a class="logo" href="/" title="Accueil" style="color:#fff;text-decoration:none"><i></i>Nova Pro</a>
- <div class="as"><span>Maquette · voir en tant que</span><select id="as" aria-label="Voir la page en tant que"></select><a href="/" style="color:var(--sideink)">Accueil</a> <a href="/agent" style="color:var(--sideink)">Console formaliste ›</a></div></div>
+ <div class="as"><span>Maquette · client</span><select id="co" aria-label="Changer de client (dossier)"></select><span>vu par</span><select id="as" aria-label="Voir la page en tant que"></select><a href="/" style="color:var(--sideink)">Accueil</a> <a href="/agent" style="color:var(--sideink)">Console formaliste ›</a></div></div>
 <div class="wrap" id="root"><div class="card empty sub">Chargement…</div></div>
 
 <dialog id="cap-doc-dlg"><div style="padding:28px"><div id="cd-head"></div><div id="cd-checks" style="margin:12px 0"></div><div id="cd-seen" class="stacked" style="display:grid;gap:10px"></div>
@@ -77,7 +77,7 @@ const rel=d=>{const n=dayDiff(d);return n==0?'aujourd’hui':n==1?'demain':n==-1
 const ago=d=>{const n=-dayDiff(d);return n<=0?'depuis aujourd’hui':n==1?'depuis hier':`depuis ${n} jours`};
 const WHO={team:'Notre équipe',notary:'Le notaire'};
 
-async function load(){const id=qs.get('id');V=await api('capital'+(id?'?id='+id:''));NOW=new Date(V.plan?.now||Date.now());render();if(V.case)loadMsgs(V.shareholders.find(s=>s.id==asId))}
+async function load(){const id=qs.get('id');V=await api('capital'+(id?'?id='+id:''));loadCos();NOW=new Date(V.plan?.now||Date.now());render();if(V.case)loadMsgs(V.shareholders.find(s=>s.id==asId))}
 // Blocs repliables : on garde ouverts ceux que la personne a ouverts, d'un rendu à l'autre
 const OPEN=new Set();let showDone=false,showFollow=false;
 document.addEventListener('toggle',e=>{const k=e.target.dataset?.k;if(k)e.target.open?OPEN.add(k):OPEN.delete(k)},true);
@@ -120,19 +120,19 @@ const phrase=t=>{const d=t.docId&&V.documents.find(x=>x.id==t.docId);if(d){const
 const lastRemind=sh=>V.messages.filter(m=>m.rule=='relance'&&m.to_email==sh.email).map(m=>m.created_at)[0];
 function blockedCard(others,founder){const t=others[0],sh=t.sh,first=sh.name.split(' ')[0],lr=lastRemind(sh);
  const canRemind=founder&&V.actions.some(a=>a.id=='remind:'+sh.id);
- return `<div class="card now wait"><div class="eyebrow">${founder?'Rien à faire de votre côté':t.urgent?'Dossier en pause':'En attente d’un associé'}</div>
+ return `<div class="card now wait"><div class="eyebrow">${founder?'En attente de '+esc(first):t.urgent?'Dossier en pause':'En attente d’un associé'}</div>
   <h2>${esc(first)} doit ${esc(phrase(t))}</h2>
-  ${t.why&&t.urgent?`<p class="why"><b>Motif :</b> ${esc(t.why)}${founder?` ${esc(first)} a reçu un email avec la marche à suivre.`:''}</p>`:''}
+  ${t.why&&t.urgent?`<p class="why"><b>Motif :</b> ${founder?`${esc(V.documents.find(x=>x.id==t.docId)?.explanation?.title||t.why)}. ${esc(first)} a reçu un email avec la marche à suivre.`:esc(t.why)}</p>`:''}
   <div class="meta">${t.since?`<span>En attente <b>${ago(t.since)}</b></span>`:''}${lr?`<span>Dernière relance : <b>${rel(lr.replace(' ','T')+'Z')}</b></span>`:''}${founder?'':'<span>Le fondateur suit ce point.</span>'}</div>
   ${canRemind?`<button class="btn ghost" data-act="remind:${sh.id}">Relancer ${esc(first)}</button>`:''}
   <div class="after">${others.length>1?`Aussi attendu : ${others.slice(1).map(o=>`${esc(o.who.split(' ')[0])} doit ${esc(phrase(o))}`).join(' · ')}. `:''}Le dossier reprend dès que c’est fait.</div></div>`}
 function nextCard(c,me,mine,waits,others,founder){
- if(c.status=='Completed')return `<div class="card now done"><div class="eyebrow">Dossier terminé</div><h2>Vos ${capE(c.total_cents)} sont sur votre compte pro</h2><p class="why">Versés le ${day(c.completed_at)}. La société peut démarrer son activité.</p><a class="btn ghost" target="_blank" href="/api/capital/${c.id}/certificate.pdf">Télécharger l’attestation de dépôt</a></div>`;
+ if(c.status=='Completed')return `<div class="card now done"><div class="eyebrow">Dossier terminé</div><h2>Vos ${capE(c.total_cents)} sont sur votre compte pro</h2><p class="why">Versés le ${day(c.completed_at).replace(/\.$/,'')}. La société peut démarrer son activité.</p><a class="btn ghost" target="_blank" href="/api/capital/${c.id}/certificate.pdf">Télécharger l’attestation de dépôt</a></div>`;
  if(c.status=='Canceled')return `<div class="card now"><div class="eyebrow">Dossier arrêté</div><h2>${c.cancel_sensitive?'Ce dossier ne peut pas aboutir':'Dossier annulé'}</h2><p class="why">${c.cancel_sensitive?'Un conseiller va vous contacter pour vous expliquer la suite, notamment pour les fonds déjà versés.':esc(c.cancel_label||c.cancel_note||'')}</p></div>`;
  if(!mine.length&&others.length)return blockedCard(others.sort((a,b)=>!!b.urgent-!!a.urgent),founder);
  if(!mine.length){const w=waits.find(x=>x.kind)||waits[0];
   return `<div class="card now"><div class="eyebrow">Rien à faire de votre côté</div><h2>${w?esc(w.who)+' : '+esc(w.title.charAt(0).toLowerCase()+w.title.slice(1)):'Votre dossier avance'}</h2>
-   <p class="why">${w?.due?`Réponse attendue ${w.late?'<b style="color:var(--ko)">en retard, nous relançons</b>':`d’ici le <b>${day(w.due)}</b> (${rel(w.due)})`}.`:'Nous vous prévenons par email dès qu’une action est attendue de vous.'}</p>
+   <p class="why">${w?.due?(w.late?`Cette étape prend plus de temps que prévu (initialement le ${day(w.due)}) : nous avons relancé. Les dates ci-dessous en tiennent compte.`:`Réponse attendue d’ici le <b>${day(w.due)}</b> (${rel(w.due)}).`):'Nous vous prévenons par email dès qu’une action est attendue de vous.'}</p>
    <div class="after">Vous recevrez un email à chaque étape.</div></div>`}
  const t=mine[0],rest=mine.slice(1);
  let body='';
@@ -159,13 +159,14 @@ const SHORT=t=>{const d=t.docId&&V.documents.find(x=>x.id==t.docId);
 const OKL={docs:'Signé',kyc:'Vérifié',pay:'Reçu'};
 function frise(c,p,founder){const st=V.steps,S=V.shareholders,done=st.filter(s=>s.state=='done'),paused=S.some(s=>(p.todos[s.id]||[]).some(t=>t.urgent));
  const row=(s,i)=>{const goal=s.goal||s.key=='release',cur=s.state=='current';
-  const when=s.state=='done'?(s.done_at?day(s.done_at):'fait'):goal?`${cur?'prévue':'estimée'}<br><b>${s.eta?day(s.eta):'—'}</b>`:cur?(paused?'en pause':s.eta?'prévue '+day(s.eta):'en cours'):s.eta?'≈ '+day(s.eta):'';
-  return `<div class="st ${s.state=='done'?'done':cur?'cur':'todo'}${goal&&s.state!='done'?' goal':''}"><span class="jd">${s.state=='done'?'✓':goal?'★':i+1}</span><div><b>${esc(s.key=='release'?'Capital sur votre compte pro':s.title)}</b><span class="s">${esc(s.desc)}</span>${cur?detail(s,p,founder):''}</div><div class="when">${when}</div></div>`};
+  const when=s.state=='done'?(s.done_at?day(s.done_at):'fait'):goal?`${cur?'prévue':'estimée'}<br><b>${s.eta?day(s.eta):'—'}</b>`:cur?(paused?'en pause':s.eta?'prévue '+day(s.eta):'en cours'):s.eta?'estimée<br>'+day(s.eta):'';
+  const n=st.slice(0,i+1).filter(x=>!(x.goal||x.key=='release')).length;   // les jalons (★) ne prennent pas de numéro
+  return `<div class="st ${s.state=='done'?'done':cur?'cur':'todo'}${goal&&s.state!='done'?' goal':''}"><span class="jd">${s.state=='done'?'✓':goal?'★':n}</span><div><b>${esc(s.key=='release'?'Capital sur votre compte pro':s.title)}</b><span class="s">${esc(s.desc)}</span>${cur?detail(s,p,founder):''}</div><div class="when">${when}</div></div>`};
  const fold=done.length>=2&&done.length<st.length;
  const late=p.waiting.filter(w=>w.late);
  return `<div class="frise">${fold?`<button class="fold" data-fold><span><b>✓</b> ${done.length} étapes terminées · ${done.map(s=>esc(s.title.charAt(0).toLowerCase()+s.title.slice(1))).join(', ')}</span><span>${showDone?'Masquer':'Voir'}</span></button>`:''}
   ${st.map((s,i)=>fold&&s.state=='done'&&!showDone?'':row(s,i)).join('')}
-  ${late.length?`<div class="warn bad" style="margin:4px 0 14px">${late.map(w=>`${esc(WHO[w.who])} a du retard sur « ${esc(w.title)} » (prévu le ${day(w.due)}). Nous relançons.`).join('<br>')}</div>`:''}</div>
+  ${late.length?`<div class="note" style="margin:4px 0 14px">${late.map(w=>`« ${esc(w.title)} » prend plus de temps que prévu (initialement le ${day(w.due)}) : nous avons relancé.`).join('<br>')}</div>`:''}</div>
   <div class="note">Dates estimées si chaque action en attente est faite aujourd’hui, mises à jour à chaque étape.</div>`}
 // Sur l'étape en cours : chaque associé (avec son statut) et les tiers attendus
 function detail(s,p,founder){const S=V.shareholders,all=['docs','kyc','pay'].includes(s.key);
@@ -173,7 +174,7 @@ function detail(s,p,founder){const S=V.shareholders,all=['docs','kyc','pay'].inc
  const L=S.filter(sh=>all||pick(sh)).map(sh=>{const t=pick(sh),me=sh.id==asId;
   const remind=founder&&!me&&t&&V.actions.some(a=>a.id=='remind:'+sh.id)?` <button class="lnk" data-act="remind:${sh.id}">Relancer</button>`:'';
   return `<li><span>${esc(sh.name)}${me?' (vous)':''}${s.key=='pay'?' · '+capE(sh.amount_cents):''}</span><span class="${t?(t.urgent?'ko':'wt'):'ok'}">${t?esc(SHORT(t)):(OKL[s.key]||'OK')+' ✓'}${remind}</span></li>`});
- const W=p.waiting.map(w=>`<li><span>${esc(WHO[w.who])} · ${esc(w.title.charAt(0).toLowerCase()+w.title.slice(1))}</span><span class="${w.late?'ko':'wt'}">${w.due?(w.late?'en retard':'d’ici le '+day(w.due)):''}</span></li>`);
+ const W=p.waiting.map(w=>`<li><span>${esc(WHO[w.who])} · ${esc(w.title.charAt(0).toLowerCase()+w.title.slice(1))}</span><span class="wt">${w.due?(w.late?'relancé':'d’ici le '+day(w.due)):''}</span></li>`);
  return L.length||W.length?`<ul class="sub-l">${L.join('')}${W.join('')}</ul>`:''}
 
 // 3. Le dossier, replié
@@ -198,6 +199,11 @@ document.addEventListener('click',async e=>{const b=e.target.closest('button');i
  if(b.dataset.doc){openDoc(+b.dataset.doc);return}
  if(b.dataset.act){b.disabled=true;const r=await api(`capital/${V.case.id}/act`,{action:b.dataset.act});if(r.error){toast(r.error);b.disabled=false;return}
   V=r;NOW=new Date(r.plan.now);render();toast(b.dataset.act.startsWith('remind')?'Relance envoyée':'C’est noté');scrollTo({top:0,behavior:'smooth'})}});
+// Changer de client : liste des dossiers, on recharge la vue sur le dossier choisi (vu par son fondateur)
+async function loadCos(){const Q=await api('capital/queue');if(!Array.isArray(Q))return;
+ $('#co').innerHTML=Q.map(q=>`<option value="${q.id}" ${q.id==V.case?.id?'selected':''}>${esc(q.company_name)} · ${esc(q.label||q.status)}</option>`).join('');$('#co').hidden=!Q.length}
+$('#co').onchange=e=>{const u=new URL(location);u.searchParams.set('id',e.target.value);u.searchParams.delete('as');history.replaceState(null,'',u);
+ qs.set('id',e.target.value);asId=null;MSGS=[];OPEN.clear();showDone=showFollow=false;$('#root').innerHTML='<div class="card empty sub">Chargement…</div>';load()};
 $('#as').onchange=e=>{asId=+e.target.value;const u=new URL(location);u.searchParams.set('as',asId);history.replaceState(null,'',u);MSGS=[];render();loadMsgs(V.shareholders.find(s=>s.id==asId))};
 document.addEventListener('click',async e=>{if(e.target.id!='m-send')return;const me=V.shareholders.find(s=>s.id==asId),txt=$('#m-reply').value.trim();if(!txt)return;
  const r=await api('client-messages/reply',{caseId:V.case.id,email:me.email,text:txt});if(r.error)return toast(r.error);MSGS=r;$('#msgs').outerHTML=msgsCard(me);toast('Message envoyé')});
