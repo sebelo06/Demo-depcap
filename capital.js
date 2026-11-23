@@ -195,7 +195,7 @@ async function deliver(caseId, eventId, m) {
 // ---------- Règles : transition détectée → messages ----------
 const who = (s) => ({ role: s.is_admin ? 'fondateur' : 'associé', name: s.name, email: s.email });
 const sign = `\n\nL’équipe ${BRAND}`;
-const link = (p) => `${process.env.CAPITAL_URL || `http://localhost:${process.env.CAPITAL_PORT || 3100}`}/client${p ? '#' + p : ''}`;
+const link = (p) => `${process.env.CAPITAL_URL || process.env.RENDER_EXTERNAL_URL || `http://localhost:${process.env.CAPITAL_PORT || 3100}`}/client${p ? '#' + p : ''}`;
 
 function rules(type, res, prev) {
   const msgs = [], add = (rule, to, subject, body) => msgs.push({ rule, to, subject, body: body + sign });

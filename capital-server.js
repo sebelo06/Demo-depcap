@@ -3,6 +3,8 @@
 // Lancement : npm run capital   (CAPITAL_PORT=3100 par défaut ; MAIN_URL = app principale, pour créditer le compte pro en maquette)
 import http from 'node:http';
 import { readFile } from 'node:fs/promises';
+import { spawn } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import { isLive } from './swan.js';
 import * as capital from './capital.js';
 import * as partnerMail from './swanmail.js';
@@ -11,7 +13,7 @@ import { run, get } from './db.js';
 import * as threads from './threads.js';
 import * as gmail from './gmail.js';
 
-const PORT = process.env.CAPITAL_PORT || 3100;
+const PORT = process.env.CAPITAL_PORT || process.env.PORT || 3100;   // PORT : imposé par l'hébergeur (Render)
 const MAIN_URL = process.env.MAIN_URL || `http://localhost:${process.env.PORT || 3000}`;
 const body = (req) => new Promise((ok) => { let s = ''; req.on('data', (c) => (s += c)); req.on('end', () => ok(s ? JSON.parse(s) : {})); });
 const send = (res, code, type, data, extra = {}) => { res.writeHead(code, { 'Content-Type': type, ...extra }); res.end(data); };
@@ -137,4 +139,9 @@ http.createServer(async (req, res) => {
   } catch (e) {
     send(res, e.code === 'ENOENT' ? 404 : 400, 'application/json', JSON.stringify({ error: e.message, warnings: e.warnings }));
   }
-}).listen(PORT, () => console.log(`Nova Pro · Dépôt de capital [${isLive ? 'LIVE' : 'MOCK'}] · Gmail ${gmail.isLive ? `réel (${gmail.ADDRESS})` : 'simulé'} → http://localhost:${PORT}`));
+}).listen(PORT, () => {
+  console.log(`Nova Pro · Dépôt de capital [${isLive ? 'LIVE' : 'MOCK'}] · Gmail ${gmail.isLive ? `réel (${gmail.ADDRESS})` : 'simulé'} → http://localhost:${PORT}`);
+  // Démo en ligne : base vide au démarrage → on crée les dossiers d'exemple (DEMO_SEED=1, mode simulé uniquement)
+  if (process.env.DEMO_SEED === '1' && !isLive && !get('SELECT id FROM cd_cases LIMIT 1'))
+    spawn(process.execPath, [fileURLToPath(new URL('./scripts/demo-capital.mjs', import.meta.url))], { stdio: 'inherit', env: { ...process.env, CAPITAL_URL: `http://localhost:${PORT}` } });
+});

@@ -1,0 +1,16 @@
+# Déploiement Render (Blueprint) : démo publique en mode simulé, base remise à zéro à chaque redémarrage.
+services:
+  - type: web
+    name: demo-depcap
+    runtime: node
+    plan: free
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      - key: MODE
+        value: mock
+      - key: DEMO_SEED
+        value: "1"
