@@ -46,6 +46,8 @@ R('POST', '/api/capital/(\\d+)/act', async (req, u, [id]) => {
 R('POST', '/api/capital/(\\d+)/withdraw', async (req, u, [id]) => { await capital.withdraw(+id); await capital.checkAlerts(); return capital.view(+id); });
 R('POST', '/api/test/backdate', testOnly(async (req) => { const b = await body(req); capital.backdate(Number(b.caseId), b.days); await capital.checkAlerts(); return capital.view(Number(b.caseId)); }));
 R('POST', '/api/capital/(\\d+)/delete', testOnly(async (req, u, [id]) => capital.remove(+id)));
+R('POST', '/api/test/clear-mails', testOnly(async () => capital.clearMails()));
+R('POST', '/api/test/clear-cases', testOnly(async () => capital.clearCases()));
 R('GET', '/api/capital/(\\d+)/docs/(\\d+)/preview.pdf', async (req, u, [id, d]) => ({ raw: await capital.generatedPdf(+id, +d), type: 'application/pdf', headers: { 'Content-Disposition': 'inline; filename="document.pdf"' } }));
 R('GET', '/api/capital/(\\d+)/certificate.pdf', async (req, u, [id]) => ({ raw: await capital.certificate(+id), type: 'application/pdf', headers: { 'Content-Disposition': 'inline; filename="attestation-depot-capital.pdf"' } }));
 R('GET', '/api/mailing', async () => capital.mailing());
@@ -131,8 +133,9 @@ http.createServer(async (req, res) => {
       const out = await h(req, u, match.slice(1));
       return out?.raw !== undefined ? send(res, 200, out.type, out.raw, out.headers) : send(res, 200, 'application/json', JSON.stringify(out));
     }
-    // Pages : /client (vue du fondateur ou d'un associé), /agent (console du formaliste), / (atelier de simulation + Mailing)
-    const PAGES = { '/agent/conversation': 'conversation.html', '/': 'capital.html', '/client': 'client.html', '/agent': 'agent.html', '/agent/statuts': 'statuts.html', '/dashboard': 'dashboard.html', '/nova.css': 'nova.css' };
+    // Pages : / (accueil de la démo), /client (vue du fondateur ou d'un associé), /agent (console du formaliste), /atelier (atelier technique + Mailing)
+    const PAGES = { '/agent/conversation': 'conversation.html', '/': 'accueil.html', '/atelier': 'capital.html', '/client': 'client.html', '/agent': 'agent.html', '/agent/statuts': 'statuts.html', '/dashboard': 'dashboard.html', '/nova.css': 'nova.css',
+      '/maquettes/client': 'maquette-client.html', '/maquettes/formaliste': 'maquette-formaliste.html', '/maquettes/accueil': 'maquette-accueil.html' };
     const page = PAGES[u.pathname];
     if (!page) return send(res, 404, 'application/json', JSON.stringify({ error: 'Introuvable' }));
     send(res, 200, page.endsWith('.css') ? 'text/css; charset=utf-8' : 'text/html; charset=utf-8', await readFile(new URL('./public/' + page, import.meta.url)));

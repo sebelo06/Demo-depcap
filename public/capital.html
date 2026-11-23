@@ -151,7 +151,8 @@ table.ids td{padding:7px 6px;font-size:12px}
 </style></head><body>
 <aside>
  <div class="logo"><i></i>Nova Pro</div>
- <div class="org">Dépôt de capital<small>Espace séparé</small></div>
+ <div class="org">Atelier technique<small>Dépôt de capital · données de test</small></div>
+ <a href="/" style="color:var(--sideink)"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Accueil de la démo</a>
  <a data-t="capital"><svg viewBox="0 0 24 24"><path d="M3 20h18M5 20V10l7-5 7 5v10M9 20v-6h6v6"/></svg>Dépôt de capital</a>
  <a data-t="mailing"><svg viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg>Mailing<span class="nb" id="nb-ml" style="display:none"></span></a>
  <div class="sep"></div>
@@ -162,7 +163,7 @@ table.ids td{padding:7px 6px;font-size:12px}
  <div class="badge" id="mode"></div>
 </aside>
 <main>
- <section class="sec on" id="capital"><header class="top"><h2>Dépôt de capital</h2><span class="pill">Maquette · données fictives</span></header><div id="cap-root"></div></section>
+ <section class="sec on" id="capital"><header class="top"><h2>Atelier technique</h2><span class="pill">Vues client et interne, journal API · données fictives</span></header><div id="cap-root"></div></section>
  <section class="sec" id="mailing"><header class="top"><h2>Mailing</h2><span class="pill">À construire ensemble</span></header><div id="ml-root"></div></section>
 </main>
 <dialog id="cap-doc-dlg"><div style="padding:28px"><div id="cd-head"></div><div id="cd-checks" style="margin:12px 0"></div><div id="cd-seen" class="stacked" style="display:grid;gap:10px"></div>
@@ -219,7 +220,7 @@ function capClient(v){const c=v.case,pct=c.total_cents?Math.round(v.funded/c.tot
  const steps=`<div class="cap-steps">${v.steps.map((s,i)=>`<div class="cs ${s.state}${s.goal?' goal':''}"><span class="cs-dot">${s.state=='done'?'✓':i+1}</span><b>${esc(s.title)}</b><span class="sub">${esc(s.desc)}</span></div>`).join('')}</div>`;
  const sh=v.shareholders.map(s=>`<tr><td><span class="av">${ini(s.name)}</span><b>${esc(s.name)}</b>${s.is_admin?'<span class="tag">Fondateur</span>':''}<div class="sub" style="margin-left:40px">${esc(s.email)}</div></td>
   <td class="r"><b>${capE(s.amount_cents)}</b></td><td>${tp(T_SH[s.status],s.label)}</td>
-  <td>${s.iban?`<span class="mono">${esc(s.iban)}</span> <button class="lnk" data-copy="${esc(s.iban)}">Copier</button>`:'<span class="sub">Disponible après la vérification d’identité</span>'}${s.attempts&&s.status=='WaitingForTransfer'?`<div class="sub" style="color:var(--ko)">${s.attempts} virement refusé · ${2-s.attempts} tentative restante</div>`:''}</td></tr>`).join('');
+  <td>${s.iban?`<span class="mono">${esc(s.iban)}</span> <button class="lnk" data-copy="${esc(s.iban)}">Copier</button>`:'<span class="sub">Disponible après la vérification d’identité</span>'}${s.attempts&&s.status=='WaitingForTransfer'?`<div class="sub" style="color:var(--ko)">${s.attempts} virement${s.attempts>1?'s':''} refusé${s.attempts>1?'s':''} · nouveau virement attendu</div>`:''}</td></tr>`).join('');
  const groups=[[c.company_name,v.documents.filter(d=>!d.shareholder_id&&!d.notary)],...v.shareholders.map(s=>[s.name,v.documents.filter(d=>d.shareholder_id==s.id)])];
  const docs=groups.map(([g,ds])=>`<tr class="grp"><td colspan="2">${esc(g)}</td></tr>`+ds.map(d=>`<tr><td>${esc(d.label)}${d.kyc?'<div class="sub">Recueillie lors de la vérification d’identité</div>':''}${d.explanation?`<div class="warn bad" style="margin:6px 0 0"><b>Refusé : ${esc(d.explanation.title)}</b><br>${esc(d.explanation.fix)}</div>`:''}</td>
   <td class="r">${tp(T_DOC[d.status],d.status_label)}${d.uploadable?` <button class="btn sm" data-doc="${d.id}">${d.status=='Refused'?'Remplacer':'Déposer'}</button>`:''}</td></tr>`).join('')).join('');
@@ -308,7 +309,7 @@ async function loadMailing(){const [m,p,th]=await Promise.all([api('mailing'),ap
  let body='';
  if(mlTab=='tpl')body=`<div class="card"><h3>Modèles (${m.templates.length})</h3><div style="overflow:auto"><table><thead><tr><th>Modèle</th><th>Déclencheur</th><th>Destinataires</th><th class="r">Envoyés</th></tr></thead><tbody>
   ${m.templates.map(t=>`<tr><td><b>${esc(t.desc)}</b><div class="sub mono">${esc(t.rule)}</div></td><td><span class="mono">${esc(t.trigger)}</span></td><td>${esc(t.to)}</td><td class="r"><b>${t.sent}</b></td></tr>`).join('')}</tbody></table></div></div>`;
- if(mlTab=='conv')body=`<div class="card"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><h3>Conversations Swan / nous / client (${th.items.length})</h3><span class="sub">Gmail ${th.gmail.mode=='live'?'connecté':'simulé'} · ${esc(th.gmail.address)}</span></div><table><tbody>${th.items.map(t=>`<tr><td><b>${esc(t.company_name)}</b> <span class="sub mono">${esc(t.ref)}</span><div class="sub">${esc(t.subject||'')}${t.ticket?' · #'+esc(t.ticket):''}</div></td><td><span class="pill ${t.status=='closed'?'t-ok':t.waiting_on=='nous'?'t-warn':'t-info'}">${esc(t.waiting_label)}</span></td><td class="sub">${t.n} msg</td><td class="r"><a class="btn ghost sm" href="/agent/conversation?id=${t.id}">Ouvrir</a></td></tr>`).join('')||'<tr><td class="sub">Aucune conversation : elles se créent à la réception d’un email du partenaire.</td></tr>'}</tbody></table></div>`;
+ if(mlTab=='conv')body=`<div class="card"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><h3>Conversations Swan / nous / client (${th.items.length})</h3><span class="sub">Gmail ${th.gmail.mode=='live'?'connecté':'simulé'} · ${esc(th.gmail.address)}</span></div><table><tbody>${th.items.map(t=>`<tr><td><b>${esc(t.company_name)}</b> <span class="sub mono">${esc(t.ref)}</span><div class="sub">${esc(t.title||t.subject||'')}${t.ticket?' · #'+esc(t.ticket):''}</div></td><td><span class="pill ${t.status=='closed'?'t-ok':t.waiting_on=='nous'?'t-warn':'t-info'}">${esc(t.waiting_label)}</span></td><td class="sub">${t.n} msg</td><td class="r"><a class="btn ghost sm" href="/agent/conversation?id=${t.id}">Ouvrir</a></td></tr>`).join('')||'<tr><td class="sub">Aucune conversation : elles se créent à la réception d’un email du partenaire.</td></tr>'}</tbody></table></div>`;
  if(mlTab=='sent')body=`<div class="bgrid" style="grid-template-columns:minmax(0,1fr) minmax(0,1.2fr)"><div class="card"><h3>Envoyés (${m.sent.length})</h3><table><tbody>${m.sent.map((x,i)=>`<tr class="row" data-ml="${i}"><td><b>${esc(x.subject)}</b><div class="sub">${esc(x.to_name)} · ${esc(x.to_role)} · ${esc(x.ref||'')} · <span class="mono">${esc(x.rule)}</span></div></td><td class="r sub">${new Date(x.created_at+'Z').toLocaleString('fr-FR',{dateStyle:'short',timeStyle:'short'})}</td></tr>`).join('')||'<tr><td class="sub">Aucun message envoyé pour l’instant.</td></tr>'}</tbody></table></div>
   <div class="card"><h3 id="ml-subj">Sélectionnez un message</h3><div class="sub" id="ml-meta"></div><pre id="ml-body" style="white-space:pre-wrap;font:inherit;margin-top:14px"></pre></div></div>`;
  if(mlTab=='partner'){const it=mlItems.find(x=>x.id==mlSel);
@@ -347,5 +348,5 @@ $('#ml-root').addEventListener('click',async e=>{const r=e.target.closest('[data
 $('aside a[data-t=mailing]').addEventListener('click',async()=>{if(!capV){const v=await api('capital');if(v.case)capV=v}loadMailing()});
 api('swanmail').then(p=>{const nb=$('#nb-ml');nb.textContent=p.stats.to_validate;nb.style.display=p.stats.to_validate?'':'none'});
 api('config').then(c=>{$('#mode').textContent='Mode '+c.mode.toUpperCase()+' · API Swan';$('#main-link').href=c.mainUrl});
-if(location.hash=='#mailing'){go('mailing');api('capital').then(v=>{if(v.case)capV=v;loadMailing()})}else loadCapital();
+if(location.hash=='#mailing'){go('mailing');api('capital').then(v=>{if(v.case)capV=v;loadMailing()})}else loadCapital(new URLSearchParams(location.search).has('new'));
 </script></body></html>

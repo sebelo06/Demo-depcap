@@ -4,150 +4,353 @@
 <link rel="stylesheet" href="/nova.css">
 <style>
 body{display:block}
-.top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 20px;background:var(--side);color:#fff;flex-wrap:wrap;position:sticky;top:0;z-index:5}
-.top .logo{display:flex;align-items:center;gap:8px;font-weight:700}.top .logo i{width:18px;height:18px;border-radius:5px;background:#fff;display:inline-block}
-.top .logo small{font-weight:500;color:var(--sideink)}
-.tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:12.5px;color:var(--sideink)}.tools a{color:var(--sideink)}
-.tools .btn.ghost{background:#1b1b1b;color:#fff;border-color:#333}.clock{padding:4px 9px;border-radius:99px;background:#262626;color:#fff}.clock.shifted{background:var(--warn)}
-.layout{display:grid;grid-template-columns:340px minmax(0,1fr);gap:18px;padding:18px 20px;align-items:start;max-width:1500px;margin:0 auto}
-.q{position:sticky;top:70px;max-height:calc(100vh - 90px);overflow:auto;padding:14px}
-.qtabs{display:flex;gap:4px;margin-bottom:10px;flex-wrap:wrap}.qtabs button{border:1px solid var(--line);background:var(--card);border-radius:99px;padding:4px 10px;font:inherit;font-size:12px;cursor:pointer}.qtabs button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
-.qi{display:grid;gap:4px;width:100%;text-align:left;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:10px 12px;margin-bottom:8px;cursor:pointer;font:inherit}
-.qi:hover{background:var(--bg)}.qi.on{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
-.qi .r1{display:flex;justify-content:space-between;gap:8px;align-items:baseline}.qi .sub{font-size:12px}
-.chips{display:flex;gap:5px;flex-wrap:wrap}.chip{font-size:11px;font-weight:600;padding:2px 7px;border-radius:99px;background:var(--gray);color:#4a4a45}
-.chip.me{background:var(--ink);color:#fff}.chip.late{background:var(--kobg);color:var(--ko)}.chip.cl{background:var(--warnbg);color:var(--warn)}.chip.pt{background:#e4ecff;color:#2845b8}.chip.nt{background:#efe6ff;color:#5b3df5}.chip.ok{background:var(--okbg);color:var(--ok)}
-.hd{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
-.hd h2{font-size:20px}.kv2{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:14px}
-.kv2>div{background:var(--bg);border-radius:10px;padding:10px 12px}.kv2 .v{font-weight:700;margin-top:2px}
+/* Barre du haut : navigation seulement, les outils de démo dans un menu */
+.bar{display:flex;align-items:center;gap:22px;padding:0 20px;height:54px;background:var(--side);color:#fff;position:sticky;top:0;z-index:5}
+.bar .logo{display:flex;align-items:center;gap:8px;font-weight:700;padding:0;font-size:15px;color:#fff;text-decoration:none}.bar .logo i{width:18px;height:18px;border-radius:5px}
+.nav{display:flex;gap:4px;height:100%}.nav a{display:flex;align-items:center;gap:6px;padding:0 12px;color:var(--sideink);font-weight:500;border-bottom:2px solid transparent;text-decoration:none}
+.nav a:hover{color:#fff}.nav a.on{color:#fff;border-color:#fff}.nav .n{background:#2c2c2c;color:#fff;border-radius:99px;font-size:11px;padding:1px 7px;font-weight:700}.nav .n.r{background:var(--ko)}
+.bar .right{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--sideink)}
+.albtn{border:0;border-radius:99px;background:var(--ko);color:#fff;font:inherit;font-size:12px;font-weight:700;padding:5px 11px;cursor:pointer}
+.demo{position:relative}.demo summary{list-style:none;cursor:pointer;padding:6px 11px;border-radius:8px;background:#1d1d1d;border:1px dashed #444;color:#d9d9d4}
+.demo summary::-webkit-details-marker{display:none}.demo summary.shifted{border-color:var(--warn);color:#ffd77a}
+.demo .menu{position:absolute;right:0;top:38px;background:#fff;color:var(--ink);border-radius:12px;box-shadow:0 14px 40px #0003;padding:8px;width:260px;display:grid;gap:2px}
+.demo .menu button{text-align:left;border:0;background:none;font:inherit;padding:8px 10px;border-radius:8px;cursor:pointer}.demo .menu button:hover{background:var(--bg)}
+.demo .menu button.ko{color:var(--ko)}.demo .menu small{color:var(--mute);padding:6px 10px 2px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;font-weight:700}
+/* Mise en page */
+.lay{display:grid;grid-template-columns:320px minmax(0,1fr);gap:18px;padding:18px 20px;max-width:1360px;margin:0 auto;align-items:start}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px}
+/* File : 3 vues, une ligne = la prochaine étape */
+.q{padding:12px;position:sticky;top:72px;max-height:calc(100vh - 90px);overflow:auto}
+.segs{display:grid;grid-template-columns:repeat(3,1fr);background:var(--bg);border-radius:10px;padding:3px;margin-bottom:10px}
+.segs button{border:0;background:none;font:inherit;font-size:12.5px;font-weight:600;padding:7px 4px;border-radius:8px;cursor:pointer;color:var(--mute)}
+.segs button.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px #0001}
+.search{margin-bottom:8px;padding:8px 11px;font-size:13px}
+.qi{display:grid;grid-template-columns:1fr auto;gap:2px 8px;width:100%;text-align:left;border:0;border-radius:10px;background:none;padding:10px;font:inherit;cursor:pointer}
+.qi+.qi{border-top:1px solid var(--line);border-radius:0}.qi:hover{background:#fafaf8}
+.qi.on{background:var(--bg);border-radius:10px;box-shadow:inset 3px 0 0 var(--ink)}
+.qi b{font-size:13.5px}.qi .nx{grid-column:1/-1;font-size:12.5px;color:#4a4a45;display:flex;gap:6px;align-items:baseline;margin-top:3px}.qi .nx.late{color:var(--ko)}.qi .ag{font-size:11.5px;color:var(--mute);text-align:right;white-space:nowrap}
+.qi .late{color:var(--ko);font-weight:700}
+.dotl{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--ko);margin-right:5px;vertical-align:1px}
+.qempty{font-size:12.5px;color:var(--mute);padding:14px 10px;text-align:center}
+/* En-tête du dossier */
+.hd{padding:20px 22px}
+.hd .r1{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.hd h1{font-size:21px;margin:0;letter-spacing:-.02em}.hd h1 span{font-size:13px;color:var(--mute);font-weight:500}
+.hd .ad{font-size:12.5px;color:var(--mute)}
+.fund{min-width:190px;text-align:right}.fund .l{font-size:12px;color:var(--mute)}.fund b{display:block;font-size:17px;letter-spacing:-.01em;margin-top:1px}.fund b small{font-size:12.5px;font-weight:400;color:var(--mute)}
+.fund .prog{height:5px;margin:6px 0 0}.fund.ok b{color:var(--ok)}
+.fsees{display:flex;justify-content:space-between;gap:10px;margin-top:10px;font-size:12.5px;color:var(--mute)}.fsees q{quotes:"« " " »";color:#4a4a45}
+.fsees a{color:var(--accent);font-weight:600;white-space:nowrap}
+.tech{margin-top:10px;font-size:12px;color:var(--mute)}.tech summary{cursor:pointer}
 .mono{font-family:ui-monospace,Menlo,monospace;font-size:12px}
-.sees{border-left:3px solid var(--accent);background:#f4f1ff;padding:10px 12px;border-radius:0 8px 8px 0;font-size:13px;margin-top:14px}
-.rv{border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:12px}
-.rv.focus{border-color:var(--ink)}
-.rvh{display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap;margin-bottom:10px}
-.rvg{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:16px}
-.ck label{display:flex;gap:8px;align-items:flex-start;font-weight:400;margin:6px 0;font-size:13px}.ck input{width:auto;margin-top:3px}
-.decl{background:var(--bg);border-radius:10px;padding:10px 12px;font-size:13px}.decl div{margin:4px 0}.decl span{color:var(--mute);display:block;font-size:11.5px}
-.file{display:flex;align-items:center;gap:10px;background:var(--bg);border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:13px}.file i{width:30px;height:38px;border-radius:4px;background:#fff;border:1px solid var(--line);display:grid;place-items:center;font-style:normal;font-size:10px;font-weight:700;color:var(--ko)}
-.dec{display:grid;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
-.dec .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.dec select{width:auto;flex:1;min-width:200px}
-.dec textarea{width:100%;font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:8px;min-height:60px}
-.preview{font-size:12.5px;background:var(--kobg);color:var(--ko);border-radius:8px;padding:8px 10px}
-.hist{font-size:12px;color:var(--mute);margin-top:8px}.hist b{color:var(--ink)}
-.wl{list-style:none;margin:0;padding:0}.wl li{display:flex;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--line);font-size:13px}.wl li:first-child{border-top:0}
+.blk{margin-top:16px}.blk>h3{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute);margin:0 0 8px 4px}
+/* Prochaines actions */
+.act{display:grid;grid-template-columns:100px minmax(0,1fr) auto;gap:14px;align-items:center;padding:14px 18px}
+.act+.act{border-top:1px solid var(--line)}
+.act .t b{display:block;font-size:13.5px}.act .t .s{font-size:12.5px;color:var(--mute)}
+.act .t q{display:block;font-size:12.5px;color:#4a4a45;margin-top:4px;quotes:"« " " »";overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.act .bt{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.tag{margin-left:0;display:inline-block;font-size:11px;font-weight:700;padding:3px 8px;border-radius:99px;text-align:center;background:var(--gray);color:#4a4a45}
+.tag.me{background:var(--ink);color:#fff}.tag.cl{background:var(--warnbg);color:var(--warn)}.tag.pt{background:#e4ecff;color:#2845b8}.tag.nt{background:#efe6ff;color:#5b3df5}.tag.ok{background:var(--okbg);color:var(--ok)}.tag.ko{background:var(--kobg);color:var(--ko)}
+.grp{padding:9px 18px;background:#fafaf8;border-top:1px solid var(--line);font-size:11.5px;font-weight:700;color:var(--mute);text-transform:uppercase;letter-spacing:.05em}
+.grp:first-child{border-top:0;border-radius:14px 14px 0 0}
+.lateb{color:var(--ko);font-weight:600}
+.none{padding:16px 18px;font-size:13px;color:var(--mute)}
+/* Associés et pièces */
+.who{padding:14px 18px}.who+.who{border-top:1px solid var(--line)}
+.who .r1{display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap}
+.who .r1 b{font-size:13.5px}.who .r1 .s{font-size:12.5px;color:var(--mute)}
+.who .em{font-size:12px;color:var(--mute)}
+.docs{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.doc{font-size:12px;border:1px solid var(--line);border-radius:8px;padding:4px 9px;background:#fff;color:#4a4a45}
+.doc a{color:inherit;text-decoration:underline}
+.doc.ok{color:var(--ok);border-color:#cde9d7;background:#f6fcf8}.doc.ko{color:var(--ko);border-color:#f3c9c0;background:#fff7f5;font-weight:600}.doc.wt{color:#2845b8;border-color:#cfdcff;background:#f6f8ff}
+.why{font-size:12.5px;color:#7c2214;margin-top:6px}
+/* Bas de page */
+.foot{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;align-items:start}
+.foot details{padding:14px 18px;font-size:13px}.foot summary{cursor:pointer;font-weight:600}
+.foot .dm{border-style:dashed;border-color:#e3d38f;background:#fffdf3}.foot .dm summary{color:var(--warn)}
+.wl{list-style:none;margin:10px 0 0;padding:0}.wl li{display:flex;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line);font-size:12.5px}.wl li:first-child{border-top:0}
 .wl .t{flex:1;min-width:0}.wl .s{font-size:12px;color:var(--mute)}
-.sim .a{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:6px 0;border-top:1px solid var(--line);font-size:13px;flex-wrap:wrap}.sim .actor{font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--mute);margin:12px 0 2px}
+.sim .a{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:6px 0;border-top:1px solid #f0e6bd;font-size:12.5px;flex-wrap:wrap}.sim .actor{font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--mute);margin:12px 0 2px}
 .sim select,.sim input{width:auto;padding:5px 8px;font-size:12px}
 .lnk{background:none;border:0;padding:0;color:var(--accent);font:inherit;font-weight:600;cursor:pointer}
-.empty{text-align:center;padding:30px}
-@media(max-width:1000px){.layout{grid-template-columns:1fr}.q{position:static;max-height:none}.rvg{grid-template-columns:1fr}.kv2{grid-template-columns:1fr 1fr}}
+.empty{text-align:center;padding:40px}
+/* Pastille « qui doit agir » : Nous, Client, Swan, Notaire */
+.wp{display:inline-block;flex:none;font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;line-height:1.5;white-space:nowrap}
+.wp.nous{background:var(--ink);color:#fff}.wp.client{background:var(--warnbg);color:var(--warn)}.wp.swan{background:#e4ecff;color:#2845b8}.wp.notaire{background:#efe6ff;color:#5b3df5}.wp.fin{background:var(--okbg);color:var(--ok)}
+.act .wp{justify-self:start}.act .t .kd{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--mute);margin-bottom:1px}.act .t .kd.ko{color:var(--ko)}
+/* Suivi du dossier : barre segmentée (une étape = un segment), libellés et dates dessous */
+.trk{margin-top:18px;background:var(--bg);border-radius:12px;padding:13px 16px 12px}
+.trk-h{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:10px;font-size:12.5px;color:var(--mute)}
+.trk-h b{color:var(--ink);font-size:13.5px}.trk-h b em{font-style:normal;color:var(--accent)}.trk.late .trk-h b em{color:var(--ko)}.trk.fin .trk-h b em{color:var(--ok)}
+.trk-h .eta b{font-size:12.5px}
+.trk-bar,.trk-l{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:5px}
+.trk-bar i{height:6px;border-radius:99px;background:#dddcd6}
+.trk-bar i.done{background:var(--ok)}
+.trk-bar i.current{background:var(--accent);box-shadow:0 0 0 3px #5b3df51f;animation:trkp 1.8s ease-in-out infinite}
+.trk.late .trk-bar i.current{background:var(--ko);box-shadow:0 0 0 3px #c8321e1f}
+@keyframes trkp{50%{opacity:.55}}@media(prefers-reduced-motion:reduce){.trk-bar i.current{animation:none}}
+.trk-l{margin-top:8px}.trk-l span{min-width:0;font-size:11.5px;line-height:1.35;color:var(--mute)}
+.trk-l b{display:block;font-size:12px;font-weight:600;color:var(--ink);line-height:1.25;margin-bottom:1px}
+.trk-l .todo b{font-weight:500;color:var(--mute)}.trk-l .current b{color:var(--accent)}.trk.late .trk-l .current b{color:var(--ko)}
+.trk-l .current{color:var(--ink)}
+.trk.off .trk-bar i{background:#dddcd6;box-shadow:none;animation:none}.trk.off .trk-l b{color:var(--mute)}
+/* Prochaine action : une carte bien visible en tête du dossier */
+.next{margin-top:18px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 16px;align-items:center;border:2px solid var(--ink);border-radius:12px;padding:14px 16px;background:#fff}
+.next.wait{border:1px dashed #c9c9c2;background:#fafaf8}.next.late{border-color:var(--ko);background:#fff7f5}
+.next .lb{grid-column:1/-1;display:flex;gap:8px;align-items:center;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--mute)}
+.next.late .lb{color:var(--ko)}.next .lb .wp{text-transform:none;letter-spacing:0;font-size:11.5px}
+.next b{font-size:16px;letter-spacing:-.01em;display:block}.next .s{font-size:12.5px;color:var(--mute);margin-top:2px}
+.next .bt{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.next .bt .btn{padding:8px 14px;font-size:13px}
+@media(max-width:1000px){.trk{overflow-x:auto}.trk-bar,.trk-l{grid-template-columns:repeat(8,minmax(70px,1fr))}.next{grid-template-columns:1fr}.next .bt{justify-content:flex-start}}
+/* Guide de la démo (première visite, puis via le menu Mode démo) */
+#guide{width:min(620px,94vw);max-height:calc(100vh - 32px);overflow:hidden}#guide[open]{display:flex;flex-direction:column}#guide ol{overflow:auto;min-height:0;flex:1 1 auto}#guide .gf{border-top:1px solid var(--line);flex:none}#guide .gh{flex:none}#guide::backdrop{background:#0d0d0d80}
+#guide .gh{padding:24px 26px 6px}#guide .gh small{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--warn)}
+#guide h2{font-size:21px;letter-spacing:-.02em;margin:4px 0 6px}#guide .gh p{margin:0;color:#4a4a45;font-size:13.5px}
+#guide ol{list-style:none;margin:0;padding:10px 26px;counter-reset:g}
+#guide li{display:grid;grid-template-columns:28px 1fr;gap:12px;padding:11px 0;border-top:1px solid var(--line);font-size:13px;color:#4a4a45;counter-increment:g}#guide li:first-child{border-top:0}
+#guide li:before{content:counter(g);width:26px;height:26px;border-radius:50%;background:var(--ink);color:#fff;font-weight:700;font-size:12.5px;display:grid;place-items:center}
+#guide li b{display:block;color:var(--ink);font-size:13.5px;margin-bottom:1px}#guide li .wp{font-size:10.5px;padding:1px 7px;vertical-align:1px}#guide li em{font-style:normal;font-weight:600;color:var(--accent)}#guide kbd{font:inherit;font-weight:600;background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:0 5px;white-space:nowrap}
+#guide .gf{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 26px 20px;font-size:12px;color:var(--mute);flex-wrap:wrap}
+@media(max-width:1000px){.lay{grid-template-columns:minmax(0,1fr);padding:12px}.bar{gap:10px;padding:0 12px}.bar .logo,.albtn,.demo summary{white-space:nowrap}.q{position:static;max-height:none}.act{grid-template-columns:minmax(0,1fr);gap:8px}.act .tag{justify-self:start}.act .bt{justify-content:flex-start}.foot{grid-template-columns:1fr}.nav a:not(.on){display:none}}
+@media(max-width:600px){.nav{display:none}}
 </style></head><body>
-<div class="top"><a class="logo" href="/" title="Accueil" style="color:#fff;text-decoration:none"><i></i>Nova Pro <small>· Console formaliste · dépôt de capital</small></a>
- <div class="tools"><button class="btn sm" id="al-badge" style="display:none;background:var(--ko)"></button><span class="clock" id="clock"></span><button class="btn ghost sm" data-clock="1">+1 jour</button><button class="btn ghost sm" data-clock="0">Aujourd’hui</button>
-  <button class="btn ghost sm" id="demo">+ Démo statuts générés</button><button class="btn ghost sm" id="demo-cl">+ Démo statuts client</button><a href="/">Accueil</a><a href="/dashboard">Refus</a><a href="/#mailing">Mailing</a><a id="client-link" href="/client" target="_blank">Vue client ↗</a></div></div>
-<div class="layout"><div class="card q" id="queue"></div><div id="detail"></div></div>
+<div class="bar">
+ <a class="logo" href="/" title="Accueil"><i></i>Nova Pro</a>
+ <nav class="nav"><a href="/">Accueil</a><a class="on" href="/agent">Dossiers <span class="n" id="n-me"></span></a><a href="/atelier#mailing">Mailing <span class="n r" id="n-mail" hidden></span></a><a href="/dashboard">Refus</a></nav>
+ <div class="right">
+  <button class="albtn" id="al-badge" hidden></button>
+  <details class="demo" id="demo-menu"><summary id="clock">Mode démo ▾</summary><div class="menu">
+   <small id="clock-l">Horloge</small><button data-clock="1">Avancer d’un jour</button><button data-clock="0">Revenir à aujourd’hui</button>
+   <small>Créer un dossier</small><button id="demo">Statuts générés par Nova Pro</button><button id="demo-cl">Statuts fournis par le client</button>
+   <small>Ce dossier</small><button id="go-sim">Simuler Swan, notaire, client…</button>
+   <small>Aide</small><button id="go-guide">Comment utiliser la démo</button>
+   <small>Réinitialiser</small><button class="ko" data-reset="mails">Effacer tous les emails</button><button class="ko" data-reset="cases">Effacer tous les dossiers</button></div></details>
+ </div>
+</div>
+<div class="lay"><div class="panel q" id="queue"></div><div id="detail"></div></div>
 <div id="toast"></div>
+<dialog id="guide" aria-labelledby="guide-t">
+ <div class="gh"><small>Démo · données fictives</small><h2 id="guide-t">Bienvenue dans la console formaliste</h2>
+  <p>Vous suivez des dépôts de capital comme le ferait notre équipe. Tout est simulé : aucun email, aucun virement réel n’est envoyé.</p></div>
+ <ol>
+  <li><span><b>Choisissez un dossier</b>La file à gauche est triée en <kbd>À moi</kbd>, <kbd>En attente</kbd> et <kbd>Terminés</kbd>. Chaque ligne dit qui doit agir et quoi : <span class="wp nous">Nous</span> <span class="wp client">Client</span> <span class="wp swan">Swan</span> <span class="wp notaire">Notaire</span>. Les retards sont en rouge.</span></li>
+  <li><span><b>Lisez où en est le dossier</b>La barre de suivi montre les 8 étapes, de Documents à Capital libéré. La <em>Revue complémentaire</em>, entre Swan et le notaire, c’est nous : vérifier un refus ou une demande de Swan, puis prévenir le client.</span></li>
+  <li><span><b>Faites la prochaine action</b>La carte <kbd>Prochaine action</kbd> donne la tâche la plus urgente et son bouton : relancer ou escalader Swan, valider un email, régénérer une pièce… Le reste est dans <kbd>Toutes les actions</kbd>.</span></li>
+  <li><span><b>Jouez les autres acteurs</b>En bas du dossier, <kbd>Mode démo · simuler les autres acteurs</kbd> fait avancer le dossier : Swan valide ou refuse une pièce ou un virement, un associé dépose ou revire, le notaire répond…</span></li>
+  <li><span><b>Pilotez la démo</b>Le menu <kbd>Mode démo ▾</kbd> avance l’horloge d’un jour (les délais dépassés ouvrent des alertes Swan), crée des dossiers d’exemple et efface les emails ou tous les dossiers pour repartir de zéro.</span></li>
+  <li><span><b>Voyez ce que voit le client</b>Sous la prochaine action, <kbd>Vue client ↗</kbd> ouvre l’espace du fondateur et de ses associés. Swan n’y apparaît jamais : tout passe par nous.</span></li>
+ </ol>
+ <div class="gf"><span>Ce guide reste accessible depuis <b>Mode démo ▾ › Comment utiliser la démo</b>.</span><button class="btn" id="guide-ok" autofocus>C’est parti</button></div>
+</dialog>
 <script>
 const $=s=>document.querySelector(s);
 const esc=v=>String(v??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const api=(p,o)=>fetch('/api/'+p,o&&{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(o)}).then(r=>r.json());
 const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2600)};
 const capE=x=>(x/100).toLocaleString('fr-FR',{style:'currency',currency:'EUR'});
-let Q=[],V=null,sel=Number(new URLSearchParams(location.search).get('id'))||null,tab='todo',NOW=new Date();
+let Q=[],V=null,sel=Number(new URLSearchParams(location.search).get('id'))||null,tab='me',search='',NOW=new Date();
 const day=d=>d?new Date(d).toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'}):'—';
 const bd=(a,b)=>{let n=0;const x=new Date(a);x.setHours(0,0,0,0);const y=new Date(b);y.setHours(0,0,0,0);while(x<y){x.setDate(x.getDate()+1);if(x.getDay()%6)n++}return n};
 const age=d=>{if(!d)return '';const n=bd(new Date(String(d).includes('T')?d:d.replace(' ','T')+'Z'),NOW);return n?`${n} j ouvré${n>1?'s':''}`:'aujourd’hui'};
-const OWNER={agent:['À vous','me'],client:['Attente client','cl'],partner:['Partenaire','pt'],notary:['Notaire','nt'],none:['Terminé','ok']};
-const WHO={team:'Partenaire (Swan)',notary:'Notaire'};
+const ageS=d=>{const a=age(d);return a=='aujourd’hui'?'auj.':a.replace(/ ouvrés?/,'')};
+const low=s=>String(s||'').replace(/^./,x=>x.toLowerCase());
+const WHO={team:'Swan',notary:'Notaire'};
+const CLOSED=['Completed','Canceled'];
+const todoTxt=t=>low(t.title.replace(/votre/g,'son').replace(/^(Remplacer|Déposer) : (.)/,(m,v,x)=>v.toLowerCase()+' son '+x.toLowerCase()));
+let simOpen=false;
+const RESET={mails:['Effacer tous les emails ?\nEmails du partenaire, conversations et messages envoyés sont supprimés. Les dossiers sont conservés. Cette action est irréversible.','email(s) effacé(s)'],
+ cases:['Effacer tous les dossiers ?\nTous les dossiers, leurs pièces, leur historique et tous les emails sont supprimés. Cette action est irréversible.','dossier(s) effacé(s)']};
+async function reset(kind){if(!confirm(RESET[kind][0]))return false;const r=await api('test/clear-'+kind,{});if(r.error){toast(r.error);return false}toast(`${r.removed} ${RESET[kind][1]}`);return true}
+document.addEventListener('toggle',e=>{if(e.target.id=='sim')simOpen=e.target.open},true);
+
+// ---------- File : À moi / En attente / Terminés ----------
+const isMine=x=>x.owner=='agent'||x.alerts>0||x.partnerEmails>0;
+const F={me:x=>!CLOSED.includes(x.status)&&isMine(x),wait:x=>!CLOSED.includes(x.status)&&!isMine(x),done:x=>CLOSED.includes(x.status)};
+const L={me:'À moi',wait:'En attente',done:'Terminés'};
+// La prochaine étape du dossier, en une ligne
+// Qui doit agir : pastille de couleur (Nous = le formaliste)
+const PILL={nous:'Nous',client:'Client',swan:'Swan',notaire:'Notaire',fin:'Terminé'};
+const WK={team:'swan',notary:'notaire'};
+const pill=w=>`<span class="wp ${w}">${PILL[w]}</span>`;
+// La prochaine étape du dossier, en une ligne : qui, quoi, en retard ou non
+function nextLine(x){
+ if(x.status=='Completed')return {who:'fin',txt:`Capital viré le ${day(x.release?.date)}`};
+ if(x.status=='Canceled')return {who:'fin',txt:'Dossier annulé'};
+ const a=[];
+ if(x.alerts)a.push(`${x.escalated?'escalade':'relance'} Swan à envoyer`);
+ if(x.partnerEmails)a.push(`${x.partnerEmails} email Swan à valider`);
+ if(x.toAnswer)a.push(`${x.toAnswer} échange Swan à traiter`);
+ if(x.toFix)a.push(`${x.toFix} document généré à corriger`);
+ if(a.length)return {who:'nous',txt:a.join(' · ').replace(/^./,m=>m.toUpperCase()),late:!!x.alerts};
+ const c=x.clientTodos?.[0];if(c)return {who:'client',txt:`${c.who.split(' ')[0]} : ${todoTxt(c)}`};
+ const w=x.waiting?.[0];if(w)return {who:WK[w.who]||'swan',txt:w.title,late:w.late};
+ return {who:'fin',txt:x.label}}
+function drawQueue(){
+ const nMe=Q.filter(F.me).length,nA=Q.reduce((a,x)=>a+x.alerts,0),nM=Q.reduce((a,x)=>a+(x.partnerEmails||0),0);
+ $('#n-me').textContent=nMe;$('#n-me').hidden=!nMe;$('#n-mail').textContent=nM;$('#n-mail').hidden=!nM;
+ const bdg=$('#al-badge');bdg.hidden=!nA;bdg.textContent=`⚠ ${nA} alerte${nA>1?'s':''} Swan`;
+ const s=search.trim().toLowerCase();
+ const list=Q.filter(F[tab]).filter(x=>!s||(x.company_name+' '+x.ref).toLowerCase().includes(s))
+  .sort((a,b)=>(!!b.late.length+!!b.alerts)-(!!a.late.length+!!a.alerts)||String(a.status_since).localeCompare(String(b.status_since)));
+ $('#queue').innerHTML=`<div class="segs">${Object.keys(L).map(k=>`<button data-tab="${k}" class="${tab==k?'on':''}">${L[k]} · ${Q.filter(F[k]).length}</button>`).join('')}</div>
+  <input class="search" id="search" placeholder="Rechercher une société, une réf." value="${esc(search)}" aria-label="Rechercher un dossier">
+  <div id="qlist">${list.map(x=>{const late=x.late.length||x.alerts,nl=nextLine(x);return `<button class="qi ${x.id==sel?'on':''}" data-case="${x.id}"><b>${late?'<span class="dotl"></span>':''}${esc(x.company_name)}</b><span class="ag ${late?'late':''}">${CLOSED.includes(x.status)?esc(x.ref.slice(-4)):ageS(x.status_since)}</span><span class="nx ${nl.late?'late':''}">${pill(nl.who)}<span>${esc(nl.txt)}</span></span></button>`}).join('')||`<div class="qempty">${tab=='me'?'Rien à traiter : tout est chez le client ou le partenaire.':'Aucun dossier ici.'}</div>`}</div>`}
 
 async function loadQueue(){Q=await api('capital/queue');drawQueue()}
-function drawQueue(){
- const open=Q.filter(x=>!['Completed','Canceled'].includes(x.status));
- const F={todo:x=>x.owner=='agent',alerts:x=>x.alerts,late:x=>x.late.length,client:x=>x.owner=='client',open:x=>!['Completed','Canceled'].includes(x.status),all:()=>true};
- const L={todo:'À traiter',alerts:'Alertes partenaire',late:'En retard',client:'Attente client',open:'En cours',all:'Tous'};
- const nA=Q.reduce((a,x)=>a+x.alerts,0),bdg=$('#al-badge');bdg.style.display=nA?'':'none';bdg.textContent=`⚠ ${nA} alerte${nA>1?'s':''} partenaire`;
- const list=Q.filter(F[tab]).sort((a,b)=>(b.owner=='agent')-(a.owner=='agent')||b.late.length-a.late.length||String(a.toReviewSince||a.status_since).localeCompare(String(b.toReviewSince||b.status_since)));
- $('#queue').innerHTML=`<div class="hd" style="margin-bottom:10px"><h3 style="margin:0">Dossiers</h3><span class="sub">${open.length} en cours</span></div>
-  <div class="qtabs">${Object.keys(L).map(k=>`<button data-tab="${k}" class="${tab==k?'on':''}">${L[k]} (${Q.filter(F[k]).length})</button>`).join('')}</div>
-  ${list.map(x=>`<button class="qi ${x.id==sel?'on':''}" data-case="${x.id}"><div class="r1"><b>${esc(x.company_name)}</b><span class="sub mono">${esc(x.ref)}</span></div>
-   <div class="sub">${esc(x.label)} · ${age(x.status_since)}</div>
-   <div class="chips"><span class="chip ${OWNER[x.owner][1]}">${OWNER[x.owner][0]}</span>${x.toFix?`<span class="chip me">${x.toFix} doc généré à corriger</span>`:''}${x.toReview?`<span class="chip pt">${x.toReview} doc${x.toReview>1?'s':''} chez Swan · ${age(x.toReviewSince)}</span>`:''}${x.partnerEmails?`<span class="chip me">${x.partnerEmails} email partenaire</span>`:''}${x.alerts?`<span class="chip late">${x.escalated?'Escalade':'Relance'} partenaire</span>`:x.late.length?`<span class="chip late">Retard</span>`:''}${x.status=='Completed'?`<span class="chip ok">Capital viré le ${day(x.release?.date)}</span>`:x.release?.date&&x.status!='Canceled'?`<span class="chip">Capital ≈ ${day(x.release.date)}</span>`:''}</div></button>`).join('')||'<div class="sub empty">Aucun dossier ici.</div>'}`}
-async function loadCase(id){sel=id;const u=new URL(location);u.searchParams.set('id',id);history.replaceState(null,'',u);const [v,th]=await Promise.all([api('capital?id='+id),api('threads?caseId='+id)]);V=v;V.threads=th.items;NOW=new Date(V.plan.now);drawQueue();drawCase()}
-function setV(r){const th=V?.threads;V=r;V.threads=th;NOW=new Date(r.plan.now);drawCase();api('threads?caseId='+r.case.id).then(t=>{V.threads=t.items;drawCase()});api('capital/queue').then(q=>{Q=q;drawQueue()})}
+const tabOf=x=>F.me(x)?'me':F.wait(x)?'wait':'done';
+async function loadCase(id){sel=id;const f=Q.find(x=>x.id==id);if(f&&!F[tab](f))tab=tabOf(f);const u=new URL(location);u.searchParams.set('id',id);history.replaceState(null,'',u);const [v,th]=await Promise.all([api('capital?id='+id),api('threads?caseId='+id)]);if(!v?.case||v.error){sel=null;V=null;u.searchParams.delete('id');history.replaceState(null,'',u);drawQueue();drawCase();return}V=v;V.threads=th.items;NOW=new Date(V.plan.now);drawQueue();drawCase()}
+function setV(r){const th=V?.threads;V=r;V.threads=th;NOW=new Date(r.plan.now);drawCase();api('threads?caseId='+r.case.id).then(t=>{V.threads=t.items;drawCase()});api('capital/queue').then(q=>{Q=q;const f=Q.find(x=>x.id==sel);if(f&&!F[tab](f))tab=tabOf(f);drawQueue()})}
 
+// ---------- Détail du dossier ----------
 function drawCase(){
- if(!V?.case){$('#detail').innerHTML='<div class="card empty sub">Sélectionnez un dossier.</div>';return}
- const c=V.case,S=V.shareholders,D=V.documents,p=V.plan,adm=S.find(s=>s.is_admin)||S[0];
- $('#client-link').href='/client?id='+c.id;
- const collecting=['WaitingForInitialRequirements','WaitingForAdditionalInformation'].includes(c.status);
- const toReview=D.filter(d=>d.status=='Uploaded'&&!d.kyc&&!d.notary&&d.type!='RegisterExtract'&&(collecting||c.status=='PendingInternalReview'));
- const firstTodo=p.todos[adm.id]?.[0];
+ if(!V?.case){$('#detail').innerHTML='<div class="panel empty sub">Sélectionnez un dossier.</div>';return}
+ const c=V.case,S=V.shareholders,p=V.plan,adm=S.find(s=>s.is_admin)||S[0],closed=CLOSED.includes(c.status);
+ const pct=c.total_cents?Math.round(V.funded/c.total_cents*100):0;
  const allTodos=S.flatMap(s=>(p.todos[s.id]||[]).map(t=>({...t,who:s.name,sh:s})));
- const late=p.waiting.filter(w=>w.late);
+ const firstTodo=p.todos[adm.id]?.[0],AI=actionItems(c,allTodos);
+ const sees=firstTodo?`<q>${esc(firstTodo.title)}</q>`:(()=>{const o=allTodos.filter(t=>t.sh.id!=adm.id).sort((a,b)=>!!b.urgent-!!a.urgent)[0];
+  return o?`<q>${esc(o.who.split(' ')[0])} doit ${esc(low(o.title.replace(/votre/g,'son').replace(/^(Remplacer|Déposer) : (.)/,(m,v,x)=>v.toLowerCase()+' son '+x.toLowerCase())))}</q> · bouton Relancer`:'<q>Rien à faire de votre côté</q>'+(p.waiting[0]?` · attend : ${esc(low(p.waiting[0].title))}`:'')})();
  $('#detail').innerHTML=`
- <div class="card"><div class="hd"><div><div class="sub mono">${esc(c.ref)} · ID Swan ${esc(c.swan_id.slice(0,8))}… <button class="lnk" data-copy="${esc(c.swan_id)}">copier</button></div><h2>${esc(c.company_name)} <span class="sub" style="font-size:13px">${esc(c.legal_form||'')}</span></h2><div class="sub">${esc(c.address||'')}</div></div>
-  <div style="text-align:right"><span class="pill ${c.status=='Completed'?'t-ok':c.status=='Canceled'?'t-ko':'t-info'}">${esc(c.label)}</span><div class="sub mono" style="margin-top:4px">${esc(c.status)} · ${age(c.status_since||c.created_at)}</div></div></div>
-  <div class="kv2"><div><div class="lbl">Capital</div><div class="v">${capE(c.total_cents)}</div><div class="sub">${capE(V.funded)} reçus</div></div>
-   <div><div class="lbl">Prêt pour vérification</div><div class="v">${collecting?day(p.collectingReady):'fait'}</div></div>
-   <div><div class="lbl">Attestation</div><div class="v">${day(p.estimates.certificate?.date)}</div><div class="sub">${p.estimates.certificate?.done?'délivrée':'estimée'}</div></div>
-   <div><div class="lbl">Capital libéré</div><div class="v">${day(p.estimates.release?.date)}</div><div class="sub">${p.estimates.release?.done?'viré':'estimé'}</div></div></div>
-  ${late.length?`<div class="warn bad" style="margin-top:12px"><b>Délais dépassés</b><br>${late.map(w=>`${esc(WHO[w.who]||w.who)} · ${esc(w.title)} : prévu le ${day(w.due)} (SLA ${w.sla} j ouvré${w.sla>1?'s':''})`).join('<br>')}</div>`:''}
-  ${V.partnerEmails?`<div class="warn" style="margin-top:12px"><b>${V.partnerEmails} email du partenaire à valider</b> avant que le client ne voie la demande. <a href="/#mailing">Ouvrir Mailing</a></div>`:''}
-  ${!['Completed','Canceled'].includes(c.status)?`<div class="sees"><b>Ce que voit le fondateur :</b> ${firstTodo?`« ${esc(firstTodo.title)} »`:(()=>{const o=allTodos.filter(t=>t.sh.id!=adm.id).sort((a,b)=>!!b.urgent-!!a.urgent)[0];return o?`« ${esc(o.who)} doit ${esc(o.title.replace(/votre/g,'son').replace(/^(Remplacer|Déposer) : (.)/,(m,v,c)=>v.toLowerCase()+' son '+c.toLowerCase()).replace(/^./,x=>x.toLowerCase()))} » · bouton Relancer`:'« Rien à faire de votre côté »'+(p.waiting[0]?` · attend : ${esc(p.waiting[0].title)}`:'')})()}</div>`:''}</div>
+ <div class="panel hd">
+  <div class="r1"><div><div class="ad">${esc(c.ref)}${c.address?' · '+esc(c.address):''}</div><h1>${esc(c.company_name)} <span>${esc(c.legal_form||'')} · ${S.length} associé${S.length>1?'s':''}</span></h1></div>
+   <div class="fund ${V.funded>=c.total_cents?'ok':''}"><span class="l">Capital reçu</span><b>${capE(V.funded)} <small>sur ${capE(c.total_cents)}</small></b><div class="prog"><i style="width:${pct}%"></i></div></div></div>
+  ${tracker(c,[...AI.me,...AI.others].some(i=>i.late))}
+  ${nextCard(AI,closed)}
+  ${closed?'':`<div class="fsees"><span>Le fondateur voit : ${sees}</span><a href="/client?id=${c.id}" target="_blank">Vue client ↗</a></div>`}
+  <details class="tech"><summary>Détails techniques</summary><div style="margin-top:6px">ID Swan <span class="mono">${esc(c.swan_id)}</span> <button class="lnk" data-copy="${esc(c.swan_id)}">copier</button> · statut <span class="mono">${esc(c.status)}</span> depuis ${age(c.status_since||c.created_at)}${c.cancel_reason?` · <span class="mono">${esc(c.cancel_reason)}</span>`:''}</div></details>
+ </div>
+ <div class="blk"><h3>Toutes les actions</h3><div class="panel">${actionsList(AI)}</div></div>
+ <div class="blk"><h3>Associés et pièces</h3><div class="panel">${peopleList(c,S)}</div></div>
+ <div class="foot">${histCard()}${simCard()}</div>`}
 
- ${alertsCard()}
- ${threadsCard()}
- ${toReview.length?`<div class="card"><h3>Documents en analyse chez Swan (${toReview.length})</h3><div class="sub" style="margin-bottom:8px">Déjà contrôlés par nos soins avant envoi : Swan les valide ou les refuse (voir « Simuler les autres acteurs »).</div><ul class="wl">${toReview.map(d=>`<li><span class="chip pt">Chez Swan</span><div class="t"><b>${esc(d.label)}</b> · ${esc(d.owner)}<div class="s">transmis ${age(d.status_since)} · réponse attendue sous ${V.plan.sla.docCheck} j ouvré${d.refusals?` · ${d.refusals} refus précédent${d.refusals>1?'s':''}`:''}</div></div>${d.type=='ArticlesOfIncorporation'&&!d.generated?`<a class="btn ghost sm" href="/agent/statuts?id=${V.case.id}">Récapitulatif des statuts</a>`:''}</li>`).join('')}</ul></div>`:''}
+// Une seule liste : ce qui revient au formaliste d'abord (avec le bouton), puis ce qu'on attend des autres
+// Prochaines actions : ce qui revient au formaliste d'abord (avec le bouton), puis ce qu'on attend des autres.
+// Chaque élément : who (pastille), k (type), title, sub (HTML), q (extrait), bt (boutons HTML), late
+function actionItems(c,allTodos){const p=V.plan,me=[],others=[],T=V.threads||[];
+ // Délais partenaire dépassés : une seule ligne par attente en retard. Relance au support d'abord, puis escalade au
+ // responsable de compte si le retard dure : la ligne montre où on en est et le seul bouton utile.
+ const AG={};(V.alerts||[]).filter(a=>!a.resolved_at).forEach(a=>(AG[a.akey]=AG[a.akey]||[]).push(a));
+ Object.values(AG).forEach(g=>{const rel=g.find(a=>a.level=='relance'),up=g.find(a=>a.level=='escalade'),top=up||rel,C=V.partnerContacts;
+  const sent=(a,what,to)=>a?.relaunched_at?`${what} envoyée ${age(a.relaunched_at)}`:`${what} à envoyer à ${esc(to.name)}`;
+  const steps=[rel&&(!up||rel.relaunched_at)?sent(rel,'relance',C.support):'',up?sent(up,'escalade',C.manager):''].filter(Boolean).join(' · ');
+  const next=up&&!up.relaunched_at?['Escalader',up]:!up&&rel&&!rel.relaunched_at?['Relancer Swan',rel]:null;
+  const unacked=g.filter(a=>!a.acked_at).map(a=>a.id);
+  me.push({who:'nous',k:up?'Escalade Swan':'Délai Swan dépassé',late:1,title:top.title,
+   sub:`Prévu le ${day(top.due)} · <span class="lateb">${top.late_days} j ouvré${top.late_days>1?'s':''} de retard</span> · ${steps}${unacked.length?'':' · acquittée'}`,
+   bt:`${next?`<button class="btn sm" data-alert="${next[1].id}" data-aa="relaunch">${next[0]}</button>`:''}${unacked.length?`<button class="btn ghost sm" data-alert="${unacked.join(',')}" data-aa="ack">Acquitter</button>`:''}`})});
+ if(V.partnerEmails)me.push({who:'nous',k:'Email Swan',title:`${V.partnerEmails} email${V.partnerEmails>1?'s':''} du partenaire à valider`,sub:'Le client ne voit la demande qu’après votre validation',bt:'<a class="btn sm" href="/atelier#mailing">Valider</a>'});
+ T.filter(t=>t.status!='closed'&&t.waiting_on=='nous').forEach(t=>me.push(threadItem(t,'nous','Traiter')));
+ V.actions.filter(a=>a.id.startsWith('regenerate:')).forEach(a=>{const d=V.documents.find(x=>'regenerate:'+x.id==a.id);
+  me.push({who:'nous',k:'Pièce à corriger',title:a.label,sub:`Refusé par Swan${d?.explanation?' : '+esc(low(d.explanation.title)):''}. Corrigez le modèle ou la saisie.${d?.sign?' Les associés devront re-signer.':''}`,bt:`<button class="btn sm" data-act="${esc(a.id)}">Régénérer</button>`})});
+ // Une ligne par associé (une seule relance), avec ce qu'il lui reste à faire
+ V.shareholders.forEach(sh=>{const ts=allTodos.filter(t=>t.sh.id==sh.id);if(!ts.length)return;const u=ts.find(t=>t.urgent),first=ts.reduce((a,t)=>t.since<a?t.since:a,ts[0].since);
+  others.push({who:'client',k:u?'À corriger par le client':'Action du client',kko:!!u,title:`${sh.name} · ${ts.map(t=>todoTxt(t)).join(', ')}`,sub:`Depuis ${age(first)}${u?.why?' · '+esc(u.why):''}`,
+   bt:V.actions.some(a=>a.id=='remind:'+sh.id)?`<button class="btn ghost sm" data-act="remind:${sh.id}">Relancer</button>`:''})});
+ const alerted=new Set((V.alerts||[]).filter(a=>!a.resolved_at).map(a=>a.title));
+ p.waiting.filter(w=>!alerted.has(w.title)&&!(w.docId&&V.actions.some(a=>a.id=='regenerate:'+w.docId))).forEach(w=>{const d=w.docId&&V.documents.find(x=>x.id==w.docId),art=d&&d.type=='ArticlesOfIncorporation'&&!d.generated;
+  others.push({who:WK[w.who]||'swan',k:w.who=='notary'?'Chez le notaire':'Chez Swan',late:w.late,title:w.title,
+   sub:`Depuis ${age(w.since)} · ${w.late?`<span class="lateb">prévu le ${day(w.due)}, en retard</span>`:'réponse attendue le '+day(w.due)}${d?.refusals?` · ${d.refusals} refus précédent${d.refusals>1?'s':''}`:''}${w.internal?' · '+esc(w.internal):''}`,
+   bt:art?`<a class="btn ghost sm" href="/agent/statuts?id=${c.id}">Récapitulatif des statuts</a>`:''})});
+ T.filter(t=>t.status!='closed'&&t.waiting_on!='nous').forEach(t=>others.push(threadItem(t,t.waiting_on=='client'?'client':'swan','Ouvrir',true)));
+ return {me,others}}
+function threadItem(t,who,lbl,ghost){return {who,k:who=='nous'?'Échange Swan à traiter':who=='client'?'Réponse du client attendue':'Réponse de Swan attendue',title:t.title||t.subject||'Demande du partenaire',
+ sub:`${t.ticket?'Ticket #'+esc(t.ticket)+' · ':''}${t.n} message${t.n>1?'s':''} · dernier ${age(t.last_at)}`,q:t.last_body?t.last_body.replace(/\s+/g,' ').slice(0,160):'',
+ bt:`<a class="btn ${ghost?'ghost ':''}sm" href="/agent/conversation?id=${t.id}">${lbl}</a>`}}
+const actRow=i=>`<div class="act">${pill(i.who)}<div class="t"><span class="kd ${i.kko||i.late?'ko':''}">${esc(i.k)}</span><b>${esc(i.title)}</b><span class="s">${i.sub}</span>${i.q?`<q>${esc(i.q)}</q>`:''}</div><div class="bt">${i.bt||''}</div></div>`;
+function actionsList({me,others}){
+ if(!me.length&&!others.length)return '<div class="none">Personne : dossier terminé.</div>';
+ return `<div class="grp">À vous · ${me.length}</div>${me.map(actRow).join('')||'<div class="none">Rien à faire de votre côté.</div>'}${others.length?`<div class="grp">En attente des autres · ${others.length}</div>${others.map(actRow).join('')}`:''}`}
+// La carte « Prochaine action » : la première chose à faire de notre côté, sinon ce qu'on attend (en retard d'abord)
+function nextCard({me,others},closed){
+ if(closed)return '';
+ const i=me[0]||[...others].sort((a,b)=>!!b.late-!!a.late)[0];
+ if(!i)return '';
+ const mine=!!me[0],lbl=mine?'Prochaine action · à vous':'Prochaine action · en attente de';
+ return `<div class="next ${mine?'':'wait'} ${i.late?'late':''}"><div class="lb">${lbl} ${pill(i.who)}${i.late?' · en retard':''}${me.length>1?` <span style="margin-left:auto;text-transform:none;letter-spacing:0;font-weight:500">+ ${me.length-1} autre${me.length>2?'s':''} action${me.length>2?'s':''} pour vous</span>`:''}</div>
+  <div><b>${esc(i.title)}</b><div class="s">${esc(i.k)} · ${i.sub}</div></div><div class="bt">${i.bt||''}</div></div>`}
+// Suivi du dossier : les 7 étapes, avec la date de chaque étape faite et l'estimation des suivantes
+const SHORT={docs:'Documents',kyc:'Identité',pay:'Apports',review:'Vérification Swan',extra:'Revue complémentaire',cert:'Attestation notaire',kbis:'Kbis',release:'Capital libéré'};
+// Étapes vues par l'équipe : celles du client, plus la revue complémentaire entre la vérification Swan et le notaire
+// (nous vérifions le refus ou la demande de Swan et prévenons le client). Elle n'existe que dans la console, jamais côté client.
+function teamSteps(){const c=V.case,S=V.steps||[],out=[];
+ const asked=c.status=='WaitingForAdditionalInformation'||(c.status=='PendingInternalReview'&&(V.partnerEmails>0||(V.threads||[]).some(t=>t.status!='closed'&&t.waiting_on=='nous')));
+ const had=(V.timeline||[]).some(e=>/Complément demandé/.test(e.text));
+ S.forEach(st=>{
+  if(st.key!='review'){out.push(st);return}
+  const extra={key:'extra',title:'Revue complémentaire',desc:'Nous vérifions le refus de pièce ou la demande complémentaire de Swan, puis prévenons le client'};
+  if(asked){out.push({...st,state:'done',note:'demande reçue'},{...extra,state:'current'});return}
+  out.push(st,{...extra,state:st.state=='done'?'done':'todo',done_at:st.state=='done'&&had?st.done_at:null,note:st.state=='done'?(had?'':'non requise'):'si besoin'})});
+ return out}
+function tracker(c,late){const S=teamSteps();if(!S.length)return '';
+ const k=S.findIndex(st=>st.state=='current'),cur=S[k],last=S[S.length-1],fin=c.status=='Completed',off=c.status=='Canceled';
+ const head=fin?`<b><em>Terminé</em> · capital libéré</b>`:off?`<b>Dossier annulé</b>${c.cancel_label||c.cancel_note?' · '+esc(c.cancel_label||c.cancel_note):''}`:`<b>Étape ${k+1} sur ${S.length} · <em>${esc(SHORT[cur.key]||cur.title)}</em>${late?' · en retard':''}</b> · depuis ${age(c.status_since||c.created_at)}`;
+ const end=fin?(last.done_at?`le ${day(last.done_at)}`:''):off?'':last.eta?`Capital libéré <b>≈ ${day(last.eta)}</b>`:'';
+ const when=st=>st.note?st.note:st.state=='done'?(st.done_at?day(st.done_at):'fait'):st.state=='current'?'en cours':st.eta?'≈ '+day(st.eta):'';
+ return `<div class="trk ${off?'off':''} ${fin?'fin':''} ${late&&!fin&&!off?'late':''}" role="group" aria-label="Suivi du dossier">
+  <div class="trk-h"><span>${head}</span><span class="eta">${end}</span></div>
+  <div class="trk-bar" aria-hidden="true">${S.map(st=>`<i class="${off?'':st.state}"></i>`).join('')}</div>
+  <div class="trk-l">${S.map(st=>`<span class="${off?'todo':st.state}" title="${esc(st.title)} : ${esc(st.desc)}"><b>${esc(SHORT[st.key]||st.title)}</b>${off&&st.state!='done'?'':when(st)}</span>`).join('')}</div></div>`}
 
- <div class="card"><h3>Qui doit agir</h3><ul class="wl">
-  ${V.actions.filter(a=>a.id.startsWith('regenerate:')).map(a=>`<li><span class="chip me">À vous</span><div class="t"><b>${esc(a.label)}</b><div class="s">Refusé par le partenaire : corrigez le modèle ou la saisie. ${V.documents.find(d=>'regenerate:'+d.id==a.id)?.sign?'Les associés devront re-signer.':''}</div></div><button class="btn sm" data-act="${esc(a.id)}">Régénérer</button></li>`).join('')}
-  ${allTodos.map(t=>`<li><span class="chip cl">Client</span><div class="t"><b>${esc(t.who)}</b> · ${esc(t.title.replace(/votre/g,'son'))}<div class="s">${age(t.since)}</div></div>${V.actions.some(a=>a.id=='remind:'+t.sh.id)?`<button class="btn ghost sm" data-act="remind:${t.sh.id}">Relancer</button>`:''}</li>`).join('')}
-  ${p.waiting.map(w=>`<li><span class="chip ${w.who=='notary'?'nt':'pt'}">${w.who=='notary'?'Notaire':'Partenaire'}</span><div class="t">${esc(w.title)}${w.internal?` <span class="chip me">${esc(w.internal)}</span>`:''}<div class="s">${age(w.since)} · ${w.late?`<b style="color:var(--ko)">prévu le ${day(w.due)}</b>`:'prévu le '+day(w.due)}</div></div></li>`).join('')}
-  ${!allTodos.length&&!p.waiting.length?'<li class="sub">Personne : dossier terminé.</li>':''}</ul></div>
+// Associés et pièces : une ligne par personne (et une pour la société), les pièces en étiquettes
+function chip(d,c){const cls=d.status=='Validated'?'ok':d.status=='Refused'?'ko':d.status=='Uploaded'?'wt':'';
+ const ic={Validated:'✓',Refused:'✕',Uploaded:'⏳'}[d.status]||'○';
+ const st=d.status=='Validated'?'':d.status=='Refused'?(d.generated?' · à régénérer':' · refusé'+(d.refusals>1?` ${d.refusals} fois`:'')):d.status=='Uploaded'?' · chez Swan':d.generated?' · à signer':' · à déposer';
+ const link=d.generated&&d.preview?` · <a target="_blank" href="${esc(d.preview)}">aperçu</a>`:d.type=='ArticlesOfIncorporation'&&!d.generated?` · <a href="/agent/statuts?id=${c.id}">récap.</a>`:'';
+ return `<span class="doc ${cls}" title="${esc(d.status_label)} depuis ${age(d.status_since||c.created_at)}">${ic} ${esc(d.label)}${st}${link}</span>`}
+// Virement de l'apport : reçu → vérifié par Swan avec le dossier → validé (chez le notaire). Refusé par Swan → l'associé revire (jamais une annulation).
+const NOTARY_ON=['WaitingForNotaryShareDepositCertificate','WaitingForRegisterExtract','WaitingForNotaryTransfer','Completed'];
+function transferChip(s,c){const n=s.attempts||0,ref=n?` · ${n} refus avant`:'';
+ if(s.status=='CapitalFundsWiredToNotary'||(s.status=='CapitalTransferred'&&NOTARY_ON.includes(c.status)))return `<span class="doc ok">✓ Virement validé${ref}</span>`;
+ if(s.status=='CapitalTransferred')return `<span class="doc wt" title="Swan contrôle le virement avec le dossier">⏳ Virement reçu · vérification Swan${ref}</span>`;
+ if(n)return `<span class="doc ko" title="Le virement refusé est restitué ; ce n’est pas une cause d’annulation">✕ Virement refusé par Swan${n>1?` (${n} fois)`:''} · à refaire</span>`;
+ return s.iban?'<span class="doc">○ Virement · en attente</span>':''}
+function peopleList(c,S){const D=V.documents,why=ds=>ds.filter(d=>d.status=='Refused'&&d.explanation).map(d=>`<div class="why">${esc(d.label)} : ${esc(d.explanation.title)}${d.reason?` · « ${esc(d.reason)} »`:''}</div>`).join('');
+ const rows=S.map(s=>{const ds=D.filter(d=>d.shareholder_id==s.id);
+  return `<div class="who"><div class="r1"><span><b>${esc(s.name)}</b> ${s.is_admin?'<span class="tag">Fondateur</span>':''} <span class="em">${esc(s.email)}</span></span><span class="s">${capE(s.amount_cents)} · ${esc(s.label)}</span></div>
+   <div class="docs">${ds.map(d=>chip(d,c)).join('')}<span class="doc ${s.signed_at?'ok':''}">${s.signed_at?'✓ Signature':'○ Signature · en attente'}</span>${transferChip(s,c)}${s.iban?`<span class="doc mono" title="IBAN de dépôt">${esc(s.iban)}</span>`:''}</div>${why(ds)}</div>`});
+ const so=D.filter(d=>!d.shareholder_id);
+ if(so.length)rows.push(`<div class="who"><div class="r1"><span><b>Société</b></span><span class="s">${so.some(d=>d.generated)?'Pièces générées par Nova Pro':''}</span></div><div class="docs">${so.map(d=>chip(d,c)).join('')}</div>${why(so)}</div>`);
+ return rows.join('')}
 
- <div class="card"><h3>Pièces du dossier</h3><div style="overflow:auto"><table><thead><tr><th>Document</th><th>Titulaire</th><th>Statut</th><th>Depuis</th><th class="r">Refus</th></tr></thead><tbody>
-  ${D.map(d=>`<tr><td><b>${esc(d.label)}</b>${d.kyc?'<div class="sub">KYC partenaire</div>':''}${d.type=='ArticlesOfIncorporation'&&!d.generated?`<div class="sub">Fournis par le client · <a href="/agent/statuts?id=${c.id}">récapitulatif</a></div>`:''}${d.generated?`<div class="sub">Généré · cohérent avec le dossier · <a target="_blank" href="${esc(d.preview)}">aperçu</a></div>`:''}</td><td>${esc(d.owner)}</td><td><span class="pill ${({Validated:'t-ok',Uploaded:'t-info',Pending:'t-mute',Refused:'t-ko'})[d.status]}">${esc(d.status_label)}</span>${d.explanation?`<div class="sub">${esc(d.explanation.title)}</div>`:''}</td><td class="sub">${age(d.status_since||c.created_at)}</td><td class="r">${d.refusals||''}</td></tr>`).join('')}</tbody></table></div></div>
-
- <div class="card"><h3>Associés</h3><table><tbody>${S.map(s=>`<tr><td><b>${esc(s.name)}</b>${s.is_admin?' <span class="chip">Fondateur</span>':''}<div class="sub">${esc(s.email)} · ${esc(s.address||'')}</div></td><td>${capE(s.amount_cents)}</td><td><span class="pill t-info">${esc(s.label)}</span><div class="sub">${s.signed_at?'✓ statuts et mandat signés':'<span style="color:var(--warn)">signature en attente</span>'} · ${age(s.status_since||c.created_at)}${s.attempts?` · ${s.attempts}/2 virement(s)`:''}</div></td><td class="r mono">${esc(s.iban||'')}</td></tr>`).join('')}</tbody></table></div>
-
- ${simCard()}
- <div class="card"><details><summary class="lnk">Historique et messages envoyés (${V.messages.length})</summary><ul class="wl" style="margin-top:10px">${V.timeline.map(e=>`<li><div class="t">${esc(e.text)}<div class="s">${new Date(e.created_at+'Z').toLocaleString('fr-FR',{dateStyle:'short',timeStyle:'short'})}</div></div></li>`).join('')}</ul></details></div>`;
- }
-
-// Alertes de délai dépassé côté partenaire : relance (support) puis escalade (responsable de compte)
-// Conversations Swan / nous / client de ce dossier (une par demande du partenaire)
-function threadsCard(){const T=V.threads||[];if(!T.length)return '';const W={nous:'me',client:'cl',swan:'pt'};
- return `<div class="card"><h3>Échanges partenaire et client (${T.length})</h3><ul class="wl">${T.map(t=>`<li><span class="chip ${t.status=='closed'?'ok':W[t.waiting_on]||''}">${esc(t.waiting_label)}</span>
-  <div class="t"><b>${esc(t.subject||'Demande du partenaire')}</b>${t.ticket?` <span class="sub mono">#${esc(t.ticket)}</span>`:''}<div class="s">${t.n} message${t.n>1?'s':''} · dernier ${age(t.last_at)} · « ${esc((t.last_body||'').replace(/\s+/g,' ').slice(0,90))}… »</div></div>
-  <a class="btn ${t.waiting_on=='nous'&&t.status!='closed'?'':'ghost'} sm" href="/agent/conversation?id=${t.id}">Ouvrir</a></li>`).join('')}</ul></div>`}
-function alertsCard(){const A=V.alerts||[];if(!A.length)return '';const open=A.filter(a=>!a.resolved_at),done=A.filter(a=>a.resolved_at);
- const row=a=>{const to=a.level=='escalade'?V.partnerContacts.manager:V.partnerContacts.support;
-  return `<li><span class="chip ${a.resolved_at?'ok':'late'}">${a.level=='escalade'?'Escalade':'Relance'}</span><div class="t"><b>${esc(a.title)}</b><div class="s">échéance ${day(a.due)} · ${a.late_days} j ouvré${a.late_days>1?'s':''} de retard · ouverte ${age(a.opened_at)}${a.relaunched_at?` · <b>${a.level=='escalade'?'escaladée':'relancée'} ${age(a.relaunched_at)}</b>`:''}${a.acked_at?' · acquittée':''}${a.resolved_at?' · résolue':''}</div>${!a.resolved_at?`<div class="s">→ ${esc(to.name)} &lt;${esc(to.email)}&gt;</div>`:''}</div>
-  ${a.resolved_at?'':`${a.relaunched_at?'':`<button class="btn sm" data-alert="${a.id}" data-aa="relaunch">${a.level=='escalade'?'Escalader':'Relancer le partenaire'}</button>`}${a.acked_at?'':` <button class="btn ghost sm" data-alert="${a.id}" data-aa="ack">Acquitter</button>`}`}</li>`};
- return `<div class="card" style="${open.length?'border-color:var(--ko)':''}"><h3>Délais partenaire ${open.length?`<span class="chip late">${open.length} ouverte${open.length>1?'s':''}</span>`:''}</h3>
-  <div class="sub" style="margin-bottom:8px">Relance dès que le délai convenu est dépassé, escalade au responsable de compte après ${V.escalateAfter} jours ouvrés de retard. Le client voit seulement « nous relançons ».</div>
-  <ul class="wl">${open.map(row).join('')}</ul>${done.length?`<details style="margin-top:8px"><summary class="lnk">Alertes résolues (${done.length})</summary><ul class="wl">${done.map(row).join('')}</ul></details>`:''}</div>`}
+function histCard(){const A=(V.alerts||[]).filter(a=>a.resolved_at),T=(V.threads||[]).filter(t=>t.status=='closed');
+ return `<details class="panel"><summary>Historique et messages envoyés (${V.timeline.length})</summary>
+  ${T.length?`<ul class="wl">${T.map(t=>`<li><div class="t">Échange clos : ${esc(t.title||t.subject||'Demande du partenaire')}<div class="s">${t.n} messages</div></div><a class="lnk" href="/agent/conversation?id=${t.id}">Ouvrir</a></li>`).join('')}</ul>`:''}
+  ${A.length?`<ul class="wl">${A.map(a=>`<li><div class="t">${a.level=='escalade'?'Escalade':'Relance'} Swan résolue : ${esc(a.title)}<div class="s">${a.late_days} j de retard</div></div></li>`).join('')}</ul>`:''}
+  <ul class="wl">${V.timeline.map(e=>`<li><div class="t">${esc(e.text)}<div class="s">${new Date(e.created_at+'Z').toLocaleString('fr-FR',{dateStyle:'short',timeStyle:'short'})}</div></div></li>`).join('')}</ul></details>`}
 // Actions des tiers (partenaire, notaire, client) : simulation pour faire avancer le dossier
-function simCard(){const A=V.actions.filter(a=>!/^(remind|regenerate):/.test(a.id));if(!A.length)return '';const by={};A.forEach(a=>(by[a.actorLabel]=by[a.actorLabel]||[]).push(a));
- return `<div class="card sim"><details><summary class="lnk">Simuler les autres acteurs (${A.length} actions)</summary>${Object.entries(by).map(([k,l])=>`<div class="actor">${esc(k)}</div>`+l.map(a=>`<div class="a"><span>${esc(a.label)}</span><span>${a.needsReason?`<select data-r-for="${esc(a.id)}">${Object.entries(a.needsReason=='cancel'?V.cancelReasons:V.reasons).map(([k,t])=>`<option value="${k}">${esc(t)}</option>`).join('')}</select> `:''}${a.needsReason=='doc'?`<input data-c-for="${esc(a.id)}" placeholder="Commentaire de l’analyste Swan (facultatif)" aria-label="Commentaire de l’analyste">`:''} <button class="btn ghost sm" data-act="${esc(a.id)}">Passer</button></span></div>`).join('')).join('')}</details></div>`}
+function simCard(){const A=V.actions.filter(a=>!/^(remind|regenerate):/.test(a.id)),by={};A.forEach(a=>(by[a.actorLabel]=by[a.actorLabel]||[]).push(a));
+ return `<details class="panel dm sim" id="sim" ${simOpen?'open':''}><summary>Mode démo · simuler les autres acteurs (${A.length})</summary>${A.length?Object.entries(by).map(([k,l])=>`<div class="actor">${esc(k)}</div>`+l.map(a=>`<div class="a"><span>${esc(a.label)}</span><span>${a.needsReason?`<select data-r-for="${esc(a.id)}">${Object.entries(a.needsReason=='cancel'?V.cancelReasons:V.reasons).map(([k,t])=>`<option value="${k}">${esc(t)}</option>`).join('')}</select> `:''}${a.needsReason=='doc'?`<input data-c-for="${esc(a.id)}" placeholder="Commentaire de l’analyste Swan (facultatif)" aria-label="Commentaire de l’analyste">`:''} <button class="btn ghost sm" data-act="${esc(a.id)}">Passer</button></span></div>`).join('')).join(''):'<div class="s" style="margin-top:8px">Aucune action à simuler.</div>'}</details>`}
 
-document.addEventListener('change',e=>{
-});
+// ---------- Événements ----------
+document.addEventListener('input',e=>{if(e.target.id!='search')return;search=e.target.value;const pos=e.target.selectionStart;drawQueue();const i=$('#search');i.focus();i.setSelectionRange(pos,pos)});
 document.addEventListener('click',async e=>{const b=e.target.closest('button');if(!b)return;
  if(b.dataset.tab){tab=b.dataset.tab;drawQueue();return}
- if(b.id=='al-badge'){tab='alerts';drawQueue();const f=Q.find(x=>x.alerts);if(f)loadCase(f.id);return}
- if(b.dataset.alert){b.disabled=true;const r=await api(`capital/alerts/${b.dataset.alert}/${b.dataset.aa}`,{});if(r.error){toast(r.error);b.disabled=false;return}setV(r);toast(b.dataset.aa=='ack'?'Alerte acquittée':'Message envoyé au partenaire');return}
+ if(b.id=='al-badge'){tab='me';drawQueue();const f=Q.find(x=>x.alerts);if(f)loadCase(f.id);return}
+ if(b.dataset.reset){$('#demo-menu').open=false;if(!await reset(b.dataset.reset))return;if(b.dataset.reset=='cases')return location='/agent';await loadQueue();if(sel)loadCase(sel);return}
+ if(b.id=='go-guide'){$('#demo-menu').open=false;$('#guide').showModal();return}
+ if(b.id=='guide-ok'){$('#guide').close();return}
+ if(b.id=='go-sim'){$('#demo-menu').open=false;const s=$('#sim');if(s){s.open=true;s.scrollIntoView({behavior:'smooth',block:'center'})}return}
+ if(b.dataset.alert){b.disabled=true;let r;for(const id of b.dataset.alert.split(',')){r=await api(`capital/alerts/${id}/${b.dataset.aa}`,{});if(r.error){toast(r.error);b.disabled=false;return}}setV(r);toast(b.dataset.aa=='ack'?'Alerte acquittée':'Message envoyé au partenaire');return}
  if(b.dataset.case){loadCase(+b.dataset.case);return}
  if(b.dataset.copy){try{await navigator.clipboard.writeText(b.dataset.copy);toast('Copié')}catch{toast(b.dataset.copy)}return}
- if(b.dataset.clock!==undefined){const r=await api('test/clock',{days:+b.dataset.clock});if(r.error)return toast(r.error);drawClock(r);await loadQueue();if(sel)loadCase(sel);if(r.alertsOpened)toast(`${r.alertsOpened} alerte(s) délai partenaire ouverte(s)`);return}
- if(b.id=='demo'||b.id=='demo-cl'){const n=['Atelier Lumen','Brasserie Okto','Kalo Studio','Verde Mobilité','Pixel & Co'][Math.floor(Math.random()*5)]+' SAS';
+ if(b.dataset.clock!==undefined){$('#demo-menu').open=false;const r=await api('test/clock',{days:+b.dataset.clock});if(r.error)return toast(r.error);drawClock(r);await loadQueue();if(sel)loadCase(sel);if(r.alertsOpened)toast(`${r.alertsOpened} alerte(s) délai partenaire ouverte(s)`);return}
+ if(b.id=='demo'||b.id=='demo-cl'){$('#demo-menu').open=false;const n=['Atelier Lumen','Brasserie Okto','Kalo Studio','Verde Mobilité','Pixel & Co'][Math.floor(Math.random()*5)]+' SAS';
   const r=await api('capital',{companyName:n,legalForm:'SAS',address:'12 rue de la Paix, 75002 Paris',shareholders:[{name:'Inès Moreau',email:'ines@example.fr',amount:4000,address:'3 rue Oberkampf, 75011 Paris'},{name:'Hugo Petit',email:'hugo@example.fr',amount:1000,address:'9 quai Perrache, 69002 Lyon'}],articlesSource:b.id=='demo-cl'?'client':'generated'});
   if(r.error)return toast(r.error);toast('Dossier créé');await loadQueue();loadCase(r.case.id);return}
- let body=null;
- if(b.dataset.act){const rs=document.querySelector(`[data-r-for="${CSS.escape(b.dataset.act)}"]`),cm=document.querySelector(`[data-c-for="${CSS.escape(b.dataset.act)}"]`);body={action:b.dataset.act,reasonCode:rs?.value,message:cm?.value||undefined}}
- if(!body)return;b.disabled=true;const r=await api(`capital/${V.case.id}/act`,body);if(r.error){toast(r.error);b.disabled=false;return}
- setV(r);toast(b.dataset.act?.startsWith('remind')?'Relance envoyée':'Action passée')});
-function drawClock(c){const el=$('#clock');el.textContent=(c.offsetDays?`Horloge +${c.offsetDays} j · `:'')+new Date(c.now).toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'});el.classList.toggle('shifted',!!c.offsetDays)}
-(async()=>{Q=await api('capital/queue');const first=sel||Q.find(x=>x.owner=='agent')?.id||Q[0]?.id;if(!Q.some(x=>x.owner=='agent'))tab='open';drawQueue();
- if(first)await loadCase(first);else drawCase();if(V?.clock)drawClock(V.clock);else drawClock({offsetDays:0,now:new Date().toISOString()})})();
+ if(!b.dataset.act)return;
+ const rs=document.querySelector(`[data-r-for="${CSS.escape(b.dataset.act)}"]`),cm=document.querySelector(`[data-c-for="${CSS.escape(b.dataset.act)}"]`);
+ b.disabled=true;const r=await api(`capital/${V.case.id}/act`,{action:b.dataset.act,reasonCode:rs?.value,message:cm?.value||undefined});if(r.error){toast(r.error);b.disabled=false;return}
+ setV(r);toast(b.dataset.act.startsWith('remind')?'Relance envoyée':'Action passée')});
+document.addEventListener('click',e=>{const m=$('#demo-menu');if(m.open&&!m.contains(e.target))m.open=false});
+function drawClock(c){const d=new Date(c.now).toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'});
+ $('#clock').textContent=c.offsetDays?`Mode démo · ${d} (+${c.offsetDays} j) ▾`:'Mode démo ▾';$('#clock').classList.toggle('shifted',!!c.offsetDays);$('#clock-l').textContent='Horloge · '+d}
+(async()=>{Q=await api('capital/queue');const first=sel||Q.find(F.me)?.id||Q.find(F.wait)?.id||Q[0]?.id;
+ drawQueue();
+ if(first)await loadCase(first);else drawCase();drawClock(V?.clock||{offsetDays:0,now:new Date().toISOString()})})();
+// Première visite : guide de la démo (une seule fois par navigateur)
+$('#guide').addEventListener('close',()=>{try{localStorage.setItem('demoGuideSeen','1')}catch{}});
+$('#guide').addEventListener('click',e=>{if(e.target.id=='guide')e.target.close()});   // clic sur le fond = fermer
+{const u=new URL(location);if(u.searchParams.has('guide')){u.searchParams.delete('guide');history.replaceState(null,'',u);$('#guide').showModal()}else try{if(!localStorage.getItem('demoGuideSeen'))$('#guide').showModal()}catch{}}
 </script></body></html>

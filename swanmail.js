@@ -166,7 +166,7 @@ export function sample(kind, caseId) {
   const civ = (s) => `${s.name}`;
   const asks = {
     siege: `Le contrat de domiciliation transmis date de plus de 3 mois et n’est signé que par la société de domiciliation. Merci de nous transmettre une version à jour, signée par les deux parties, à l’adresse déclarée à Swan.`,
-    virement: `Le virement de ${eurStr(other.amount_cents)} reçu pour l’apport de ${civ(other)} a été retourné : il a été émis depuis un compte qui n’est pas à son nom. Merci de lui demander d’effectuer un nouveau virement SEPA depuis un compte personnel. Attention, il s’agit de sa dernière tentative.`,
+    virement: `Le virement de ${eurStr(other.amount_cents)} reçu pour l’apport de ${civ(other)} a été retourné : il a été émis depuis un compte qui n’est pas à son nom. Merci de lui demander d’effectuer un nouveau virement SEPA depuis un compte personnel.`,
     identite: `La pièce d’identité de ${civ(other)} est expirée depuis le mois dernier. Merci de lui demander de refaire son identification avec un document en cours de validité.`,
     activite: `Afin de finaliser notre revue, merci de nous préciser l’activité exacte de ${c.company_name} ainsi que l’origine des fonds apportés par ${civ(shs[0])} (épargne, vente d’un bien, donation…), avec un justificatif.`,
   };

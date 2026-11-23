@@ -106,18 +106,38 @@ export function setClosed(threadId, closed) {
 
 // ---------- Lecture ----------
 const WHO = { swan: 'Swan', nous: 'nous', client: 'le client' };
+// Titre court d'un échange : ce que Swan demande, et pour quel associé. Le sujet du ticket Swan ne contient que l'identifiant
+// technique du dossier (« Dossier de dépôt de capital 62ebdaca-… – informations complémentaires requises »), illisible dans une liste.
+const TITLE = { activite: 'Activité et origine des fonds à préciser', virement: 'Virement à refaire', identite: 'Pièce d’identité à refaire',
+  domicile: 'Justificatif de domicile à refaire', siege: 'Domiciliation du siège à refaire', statuts: 'Statuts ou mandat à corriger', kbis: 'Kbis à fournir' };
+function shortTitle(t) {
+  const req = get('SELECT request FROM sm_inbox WHERE thread_id=? ORDER BY id LIMIT 1', t.id)?.request || '';
+  let base = TITLE[t.category];
+  if (!base) {   // demande libre : sa première phrase, coupée proprement
+    const first = req.split(/(?<=[.!?])\s+|\n/)[0]?.trim() || '';
+    base = !first ? 'Demande de Swan' : first.length > 70 ? `${first.slice(0, 68).replace(/\s+\S*$/, '')}…` : first.replace(/[.:]$/, '');
+  }
+  const who = all('SELECT name FROM cd_shareholders WHERE case_id=?', t.case_id).map((s) => s.name).filter((n) => req.includes(n));
+  return who.length === 1 ? `${base} · ${who[0]}` : base;
+}
+// Sujet d'origine, sans l'identifiant Swan du dossier (remplacé par notre référence)
+// Extrait du dernier message : sans formule d'appel ni ligne « Concernant le dossier <identifiant> : »
+const excerpt = (b, c) => String(b || '').replaceAll(c.swan_id, c.ref).replace(/^\s*(bonjour|hello|madame,? monsieur)[^\n]*\n+/i, '')
+  .replace(/^\s*(concernant|regarding)[^\n]*dossier[^\n]*:\s*/i, '').replace(/\s+/g, ' ').trim();
+const plainSubject = (s, c) => String(s || '').replace(c.swan_id, c.ref).replace(/\s*\(#\d+\)\s*$/, '');
+
 export function list({ caseId } = {}) {
   return all(`SELECT t.*, c.ref, c.company_name, c.swan_id, (SELECT COUNT(*) FROM cd_thread_msgs m WHERE m.thread_id=t.id) AS n,
     (SELECT body FROM cd_thread_msgs m WHERE m.thread_id=t.id ORDER BY id DESC LIMIT 1) AS last_body,
     (SELECT created_at FROM cd_thread_msgs m WHERE m.thread_id=t.id ORDER BY id DESC LIMIT 1) AS last_at
     FROM cd_threads t JOIN cd_cases c ON c.id=t.case_id ${caseId ? 'WHERE t.case_id=?' : ''} ORDER BY t.status='open' DESC, last_at DESC`, ...(caseId ? [caseId] : []))
-    .map((t) => ({ ...t, waiting_label: t.status === 'closed' ? 'Clôturée' : `En attente de ${WHO[t.waiting_on] || '—'}` }));
+    .map((t) => ({ ...t, title: shortTitle(t), subject: plainSubject(t.subject, t), last_body: excerpt(t.last_body, t), waiting_label: t.status === 'closed' ? 'Clôturée' : `En attente de ${WHO[t.waiting_on] || '—'}` }));
 }
 export function full(threadId) {
   const t = threadRow(threadId), c = caseOf(t.case_id);
   const shareholders = all('SELECT name, email, is_admin FROM cd_shareholders WHERE case_id=? ORDER BY is_admin DESC, id', t.case_id);
   const sm = get('SELECT * FROM sm_inbox WHERE thread_id=? ORDER BY id DESC', t.id);
-  return { thread: { ...t, waiting_label: t.status === 'closed' ? 'Clôturée' : `En attente de ${WHO[t.waiting_on] || '—'}` }, case: { id: c.id, ref: c.ref, company_name: c.company_name, swan_id: c.swan_id, status: c.status, info_source: c.info_source, info_relayed: c.info_relayed },
+  return { thread: { ...t, title: shortTitle(t), subject: plainSubject(t.subject, c), waiting_label: t.status === 'closed' ? 'Clôturée' : `En attente de ${WHO[t.waiting_on] || '—'}` }, case: { id: c.id, ref: c.ref, company_name: c.company_name, swan_id: c.swan_id, status: c.status, info_source: c.info_source, info_relayed: c.info_relayed },
     shareholders, messages: all('SELECT * FROM cd_thread_msgs WHERE thread_id=? ORDER BY id', t.id), pendingDraft: sm && sm.status === 'to_validate' ? sm.id : null,
     gmail: gmail.status(), caseAddress: gmail.caseAddress(c.ref) };
 }

@@ -45,6 +45,15 @@ db.exec(`CREATE TABLE IF NOT EXISTS cd_alerts (
 // Horodatage des statuts (délais, « depuis », retards) : colonnes ajoutées aux bases existantes
 for (const [t, col] of [['cd_cases', 'status_since TEXT'], ['cd_cases', "status_log TEXT DEFAULT '{}'"], ['cd_shareholders', 'status_since TEXT'], ['cd_shareholders', 'signed_at TEXT'], ['cd_cases', "articles_source TEXT DEFAULT 'generated'"], ['cd_documents', 'generated INTEGER'], ['cd_documents', 'client_note TEXT'], ['cd_documents', 'status_since TEXT']])
   if (!all(`PRAGMA table_info(${t})`).some((x) => x.name === col.split(' ')[0])) db.exec(`ALTER TABLE ${t} ADD COLUMN ${col}`);
+// attempts = nombre de virements refusés ou retournés par Swan (jamais une cause d'annulation ; avant : chaque virement reçu comptait aussi). Recalcul unique depuis l'historique.
+if (!get("SELECT 1 FROM settings WHERE key='cd_attempts_refusals_only'")) {
+  for (const s of all('SELECT id, case_id, name FROM cd_shareholders')) {
+    const n = get("SELECT COUNT(*) n FROM cd_transactions WHERE shareholder_id=? AND status='Rejected'", s.id).n
+      + get('SELECT COUNT(*) n FROM cd_timeline WHERE case_id=? AND text=?', s.case_id, `Virement de ${s.name} retourné lors de la vérification`).n;
+    run('UPDATE cd_shareholders SET attempts=? WHERE id=?', n, s.id);
+  }
+  run("INSERT INTO settings(key,value) VALUES('cd_attempts_refusals_only','1')");
+}
 
 // ---------- Marque et référentiels ----------
 const BRAND = 'Nova Pro';
@@ -224,11 +233,11 @@ function rules(type, res, prev) {
   if (res.kind === 'transaction') {
     const t = res.row, s = get('SELECT * FROM cd_shareholders WHERE id=?', t.shareholder_id);
     if (type === 'Transaction.Booked') return { messages: [], why: 'Couvert par Shareholder.Updated (CapitalTransferred) : on évite le doublon.' };
-    if (type === 'Transaction.Rejected') {
-      const left = Math.max(0, 2 - s.attempts);
-      add('virement-refuse', who(s), 'Votre virement a été refusé', `Bonjour ${firstName(s.name)},\n\nVotre virement de ${eur(t.amount_cents)} a été refusé : ${t.reason}.\n\n${left ? `Il vous reste une tentative. Refaites un virement SEPA depuis un compte à votre nom, du montant exact, vers :\n  ${s.iban}` : 'C’était votre deuxième tentative : le dossier ne peut pas aboutir. Notre équipe vous contacte.'}`);
-      if (adm && adm.id !== s.id) add('virement-refuse', who(adm), `Le virement de ${s.name} a été refusé`, `Bonjour ${firstName(adm.name)},\n\nLe virement de ${s.name} (${eur(t.amount_cents)}) a été refusé : ${t.reason}. ${left ? 'Il lui reste une tentative.' : 'C’était sa dernière tentative.'}`);
-      add('virement-refuse', SUPPORT, `[${c.ref}] Virement refusé (${s.attempts}/2) : ${s.name}`, `Dossier ${c.ref} (réf. partenaire ${c.swan_id})\nAssocié : ${s.name} <${s.email}>\nMotif : ${t.reason}\n${left ? 'À surveiller : il reste une tentative.' : 'URGENT : deuxième échec, le dossier va être annulé par le partenaire.'}`);
+    if (type === 'Transaction.Rejected') {   // un refus n'annule jamais le dossier : l'associé refait un virement
+      const nth = s.attempts > 1 ? ` (${s.attempts}e refus)` : '';
+      add('virement-refuse', who(s), 'Votre virement a été refusé : merci de le refaire', `Bonjour ${firstName(s.name)},\n\nVotre virement de ${eur(t.amount_cents)} a été refusé : ${t.reason}.\n\nMerci de refaire un virement SEPA depuis un compte bancaire à votre nom, du montant exact, vers :\n  ${s.iban}\n\nLe virement refusé vous est restitué.`);
+      if (adm && adm.id !== s.id) add('virement-refuse', who(adm), `Le virement de ${s.name} a été refusé`, `Bonjour ${firstName(adm.name)},\n\nLe virement de ${s.name} (${eur(t.amount_cents)}) a été refusé : ${t.reason}. Nous lui avons demandé de refaire un virement depuis un compte à son nom.`);
+      add('virement-refuse', SUPPORT, `[${c.ref}] Virement refusé${nth} : ${s.name}`, `Dossier ${c.ref} (réf. partenaire ${c.swan_id})\nAssocié : ${s.name} <${s.email}>\nMotif : ${t.reason}\nL'associé doit refaire un virement. ${s.attempts > 1 ? 'Refus répété : appeler l’associé pour l’accompagner.' : ''}`.trim());
     }
     return { messages: msgs };
   }
@@ -294,7 +303,7 @@ export const TEMPLATES = [
   ['identite-recue', 'Shareholder.Updated → WaitingForVerification', 'Associé', 'Identité reçue, vérification en cours'],
   ['iban-pret', 'Shareholder.Updated → WaitingForTransfer', 'Associé, fondateur', 'IBAN du compte de dépôt et consignes de virement'],
   ['apport-recu', 'Shareholder.Updated → CapitalTransferred', 'Associé, fondateur', 'Apport reçu, avancement des versements'],
-  ['virement-refuse', 'Transaction.Rejected', 'Associé, fondateur, support', 'Virement refusé, tentatives restantes'],
+  ['virement-refuse', 'Transaction.Rejected', 'Associé, fondateur, support', 'Virement refusé : l’associé refait un virement'],
   ['alerte-partenaire', 'Minuterie : délai partenaire dépassé', 'Support (interne)', 'Alerte relance ou escalade, message au partenaire prêt à envoyer'],
   ['relance-partenaire', 'Action interne (console formaliste)', 'Partenaire (support ou responsable de compte)', 'Relance du partenaire sur un délai dépassé'],
   ['document-genere-refuse', 'CapitalDepositDocument.Updated → Refused (document généré)', 'Support, fondateur', 'Document généré refusé : correction par nos soins'],
@@ -453,7 +462,7 @@ export function actions(caseId) {
   if (c.status === 'WaitingForInitialRequirements' || c.status === 'WaitingForAdditionalInformation')
     for (const s of S) if (s.status === 'WaitingForTransfer') {
       A(`transfer:${s.id}`, 'client', `${s.name} vire son apport (${eur(s.amount_cents)})`, { happy: true });
-      A(`transfer-bad:${s.id}`, 'client', `${s.name} vire depuis le compte d’un tiers (tentative ${s.attempts + 1}/2)`);
+      A(`transfer-bad:${s.id}`, 'client', `${s.name} vire depuis le compte d’un tiers (refusé par Swan)`);
     }
   const P = plan(c, S, D);
   for (const s of S) if (P.todos[s.id]?.length) A(`remind:${s.id}`, 'nous', `Relancer ${s.name}`);
@@ -542,7 +551,7 @@ export async function act(caseId, { action, reasonCode, message, by, note, contr
       run("INSERT INTO cd_transactions(case_id,shareholder_id,swan_id,amount_cents,status) VALUES(?,?,?,?,'Booked')", caseId, s.id, txId, s.amount_cents);
       await emit(caseId, 'Transaction.Booked', txId);
       timeline(caseId, `Apport de ${s.name} reçu : ${eur(s.amount_cents)}`);
-      await setShareholder(caseId, s, 'CapitalTransferred', { attempts: s.attempts + 1 });
+      await setShareholder(caseId, s, 'CapitalTransferred');      // un virement reçu est valable : seuls les refus de Swan comptent comme tentative ratée
       await autoProgress(caseId);
       break;
     }
@@ -550,9 +559,8 @@ export async function act(caseId, { action, reasonCode, message, by, note, contr
       const txId = randomUUID(), attempts = s.attempts + 1;
       run('UPDATE cd_shareholders SET attempts=? WHERE id=?', attempts, s.id);
       run("INSERT INTO cd_transactions(case_id,shareholder_id,swan_id,amount_cents,status,reason) VALUES(?,?,?,?,'Rejected',?)", caseId, s.id, txId, s.amount_cents, 'le compte émetteur n’est pas au nom de l’associé');
-      timeline(caseId, `Virement de ${s.name} refusé (tentative ${attempts}/2)`);
+      timeline(caseId, `Virement de ${s.name} refusé par le partenaire : nouveau virement à faire`);
       await emit(caseId, 'Transaction.Rejected', txId);
-      if (attempts >= 2) await cancelCase(caseId, null, `deux virements de ${s.name} ont été refusés`);
       break;
     }
     case 'remind': {                                   // rappel de tout ce que l'associé doit faire, avec le motif si un document est refusé
@@ -600,8 +608,7 @@ export async function act(caseId, { action, reasonCode, message, by, note, contr
       break;
     case 'return-transfer':
       timeline(caseId, `Virement de ${s.name} retourné lors de la vérification`);
-      await setShareholder(caseId, s, 'WaitingForTransfer');
-      if (s.attempts >= 2) { await cancelCase(caseId, null, `le second virement de ${s.name} a été retourné`); break; }
+      await setShareholder(caseId, s, 'WaitingForTransfer', { attempts: s.attempts + 1 });
       await setCase(caseId, 'WaitingForInitialRequirements');
       break;
     case 'certificate': {
@@ -726,9 +733,26 @@ export function backdate(caseId, days) {
 export function remove(caseId) {
   guard();
   const c = caseRow(caseId);
-  for (const t of ['cd_documents', 'cd_shareholders', 'cd_transactions', 'cd_doc_refusals', 'cd_events', 'cd_log', 'cd_timeline', 'cd_messages', 'cd_alerts', 'sm_inbox']) run(`DELETE FROM ${t} WHERE case_id=?`, caseId);
+  for (const t of ['cd_documents', 'cd_shareholders', 'cd_transactions', 'cd_doc_refusals', 'cd_events', 'cd_log', 'cd_timeline', 'cd_messages', 'cd_alerts', 'sm_inbox', 'cd_thread_msgs', 'cd_threads']) run(`DELETE FROM ${t} WHERE case_id=?`, caseId);
   run('DELETE FROM cd_cases WHERE id=?', caseId);
   return { ok: true, removed: c.ref };
+}
+
+// Démo : remise à zéro. Les emails (partenaire, conversations, messages envoyés) ou bien tous les dossiers avec tout ce qui s'y rattache.
+const MAIL_TABLES = ['sm_inbox', 'cd_thread_msgs', 'cd_threads', 'cd_messages'];
+const count = (t) => get(`SELECT COUNT(*) n FROM ${t}`).n;
+export function clearMails() {
+  guard();
+  const n = count('sm_inbox') + count('cd_threads') + count('cd_messages');
+  for (const t of MAIL_TABLES) run(`DELETE FROM ${t}`);
+  return { ok: true, removed: n };
+}
+export function clearCases() {
+  guard();
+  const n = count('cd_cases');
+  for (const t of [...MAIL_TABLES, 'cd_documents', 'cd_shareholders', 'cd_transactions', 'cd_doc_refusals', 'cd_events', 'cd_state', 'cd_log', 'cd_timeline', 'cd_alerts', 'cd_cases']) run(`DELETE FROM ${t}`);
+  run("DELETE FROM counters WHERE key LIKE 'DC-%'");      // les références repartent à DC-AAAA-0001
+  return { ok: true, removed: n };
 }
 
 async function cancelCase(caseId, reason, note = null) {
@@ -787,7 +811,7 @@ function plan(c, S, D) {
         todos[s.id].push({ kind: 'sign', act: `sign:${s.id}`, duration: '3 min', since: (parseTs(unsigned[0].status_since) || since(s)).toISOString(), docs: unsigned.map((d) => ({ id: d.id, label: DOC_TYPES[d.type].label })),
           title: `Relire et signer ${unsigned.map((d) => (d.type === 'ArticlesOfIncorporation' ? 'les statuts' : 'le mandat de dépôt')).join(' et ')}`, why: 'Préparés par nos soins à partir des informations du dossier : rien à rédiger. Chaque associé signe électroniquement.' });
       if (s.status === 'WaitingForTransfer' && collecting)
-        todos[s.id].push({ kind: 'transfer', act: `transfer:${s.id}`, urgent: s.attempts > 0, duration: '2 min', since: since(s).toISOString(), iban: s.iban, amount_cents: s.amount_cents, attempts_left: 2 - s.attempts,
+        todos[s.id].push({ kind: 'transfer', act: `transfer:${s.id}`, urgent: s.attempts > 0, duration: '2 min', since: since(s).toISOString(), iban: s.iban, amount_cents: s.amount_cents, refusals: s.attempts,
           title: `Virer votre apport de ${eur(s.amount_cents)}`, why: 'Virement SEPA depuis un compte bancaire à votre nom, du montant exact. Le virement instantané évite un jour d’attente.' });
     }
     for (const d of D) {
@@ -866,12 +890,15 @@ export function queue() {
     const mails = partnerMail.pending(c.id).length;
     const oldest = (xs) => xs.map((x) => x.since).sort()[0] || null;
     const toFix = D.filter((d) => isGen(d) && d.status === 'Refused').length;
-    const alerts = all('SELECT level FROM cd_alerts WHERE case_id=? AND resolved_at IS NULL AND acked_at IS NULL', c.id);
-    const owner = mails || toFix ? 'agent' : p.waiting.some((w) => w.who === 'team') ? 'partner' : p.waiting.some((w) => w.who === 'notary') ? 'notary' : clientTodos.length ? 'client' : 'none';
+    const alerts = all('SELECT akey, level FROM cd_alerts WHERE case_id=? AND resolved_at IS NULL AND acked_at IS NULL', c.id);
+    const toAnswer = get("SELECT COUNT(*) n FROM cd_threads WHERE case_id=? AND status!='closed' AND waiting_on='nous'", c.id).n;   // échanges avec Swan qui attendent notre réponse
+    const owner = mails || toFix || toAnswer ? 'agent' : p.waiting.some((w) => w.who === 'team') ? 'partner' : p.waiting.some((w) => w.who === 'notary') ? 'notary' : clientTodos.length ? 'client' : 'none';
     return { id: c.id, ref: c.ref, company_name: c.company_name, status: c.status, label: CASE_LABEL[c.status], status_since: c.status_since || c.created_at,
-      alerts: alerts.length, escalated: alerts.some((a) => a.level === 'escalade'), toReview: toReview.length, toFix, toReviewSince: oldest(toReview.map((d) => ({ since: d.status_since || c.created_at }))), partnerEmails: mails,
+      toAnswer, alerts: new Set(alerts.map((a) => a.akey)).size,   // une attente en retard = une alerte, même relancée puis escaladée
+      escalated: alerts.some((a) => a.level === 'escalade'), toReview: toReview.length, toFix, toReviewSince: oldest(toReview.map((d) => ({ since: d.status_since || c.created_at }))), partnerEmails: mails,
       late: p.waiting.filter((w) => w.late).map((w) => w.title), clientTodos, waiting: p.waiting, owner,
-      certificate: p.estimates.certificate || null, release: p.estimates.release || null };
+      certificate: p.estimates.certificate || null, release: p.estimates.release || null,
+      step: c.status === 'Completed' ? 7 : journey(c, S, D).findIndex((x) => x.state === 'current') + 1 };   // étape du parcours client (1 à 7, 0 si annulé)
   });
 }
 

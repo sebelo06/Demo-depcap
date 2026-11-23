@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Proposition – Vue client simplifiée</title>
+<link rel="stylesheet" href="/nova.css">
+<style>
+body{display:block}
+/* Bandeau de maquette (hors produit) */
+.mq{position:sticky;top:0;z-index:10;background:#fffbe8;border-bottom:1px dashed #d8c16a;padding:8px 16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:12.5px}
+.mq b{color:var(--warn)}.mq .seg{display:flex;gap:4px;flex-wrap:wrap}
+.mq button{border:1px solid #e3d38f;background:#fff;border-radius:99px;padding:4px 11px;font:inherit;font-size:12px;cursor:pointer}
+.mq button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.mq a{margin-left:auto;color:var(--warn);font-weight:600}
+/* Produit */
+.top{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;background:var(--side);color:#fff}
+.top .logo{display:flex;align-items:center;gap:8px;font-weight:700;padding:0;font-size:16px}.top .logo i{width:18px;height:18px;border-radius:5px}
+.top .me{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--sideink)}
+.av{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:#2a2a2a;color:#fff;font-weight:700;font-size:11px;margin:0}
+.wrap{max-width:640px;margin:0 auto;padding:26px 16px 70px}
+.co .sub{font-size:12.5px;color:var(--mute)}.co h1{font-size:24px;letter-spacing:-.02em;margin:2px 0 20px}
+.zone{font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);margin:28px 0 10px}
+/* 1. Maintenant */
+.now{background:var(--card);border:2px solid var(--ink);border-radius:16px;padding:24px}
+.now.wait{border-color:#e2c26a;background:#fffdf5}.now.done{border-color:var(--ok);background:#f6fcf8}
+.eb{font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+.now.wait .eb{color:var(--warn)}.now.done .eb{color:var(--ok)}
+.now h2{font-size:22px;margin:6px 0 6px;letter-spacing:-.02em}.why{color:#3d3d38;margin:0 0 16px}
+.meta{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--mute);margin:0 0 18px}.meta b{color:var(--ink)}
+.big{padding:13px 22px;font-size:15px;border-radius:10px}
+.pay{display:grid;grid-template-columns:1fr 132px;gap:16px;background:var(--bg);border-radius:12px;padding:16px;margin-bottom:16px;align-items:center}
+.pay dl{margin:0;display:grid;grid-template-columns:90px 1fr;gap:7px 10px;font-size:13.5px}.pay dt{color:var(--mute)}.pay dd{margin:0}
+.mono{font-family:ui-monospace,Menlo,monospace}.lnk{background:none;border:0;padding:0;color:var(--accent);font:inherit;font-weight:600;cursor:pointer}
+.qr{background:#fff;border-radius:10px;padding:8px;text-align:center;font-size:11px;color:var(--mute)}.qr svg{width:100%;display:block}
+.rules{list-style:none;padding:0;margin:0 0 18px;font-size:12.5px;color:#3d3d38}.rules li{padding-left:22px;position:relative;margin:5px 0}
+.rules li:before{content:"✓";position:absolute;left:2px;color:var(--ok);font-weight:700}.rules li.x:before{content:"!";color:var(--ko)}
+.after{font-size:12.5px;color:var(--mute);margin-top:12px}
+/* 2. Frise unique */
+.frise{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:8px 20px}
+.st{display:grid;grid-template-columns:26px 1fr auto;gap:12px;padding:14px 0;position:relative}
+.st+.st{border-top:1px solid var(--line)}
+.dot{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;background:var(--gray);color:var(--mute)}
+.st.done .dot{background:var(--ok);color:#fff}.st.cur .dot{background:var(--ink);color:#fff;box-shadow:0 0 0 4px #e3e3de}
+.st.goal .dot{background:#fff;border:2px solid var(--accent);color:var(--accent)}
+.st b{display:block}.st .s{font-size:12.5px;color:var(--mute)}.st.todo b{color:#55554f;font-weight:600}
+.when{text-align:right;font-size:12.5px;color:var(--mute);white-space:nowrap}.when b{color:var(--ink)}
+.st.goal .when b{font-size:17px;color:var(--accent);letter-spacing:-.01em}
+.sub-l{list-style:none;margin:8px 0 0;padding:0;font-size:12.5px}.sub-l li{display:flex;justify-content:space-between;gap:8px;padding:4px 0}
+.sub-l .ok{color:var(--ok);font-weight:600}.sub-l .wt{color:var(--warn);font-weight:600}.sub-l .ko{color:var(--ko);font-weight:600}
+.fold{display:flex;justify-content:space-between;align-items:center;width:100%;padding:12px 0;border:0;background:none;font:inherit;cursor:pointer;color:var(--mute);font-size:13px}
+.fold b{color:var(--ok)}
+.hide{display:none}
+/* 3. Mon dossier */
+.acc{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.acc details+details{border-top:1px solid var(--line)}
+.acc summary{list-style:none;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:15px 20px;cursor:pointer}
+.acc summary::-webkit-details-marker{display:none}
+.acc summary span{margin-left:auto;font-size:12.5px;color:var(--mute)}.acc summary:after{content:"›";font-size:18px;color:var(--mute);transition:transform .15s}
+.acc details[open] summary:after{transform:rotate(90deg)}
+.acc .in{padding:0 20px 16px;font-size:13px}
+.row{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--line)}.row:first-child{border-top:0}
+.pill.ok{background:var(--okbg);color:var(--ok)}.pill.wt{background:var(--warnbg);color:var(--warn)}.pill.ko{background:var(--kobg);color:var(--ko)}
+.prog{height:6px;margin:6px 0 10px}
+.msg{background:var(--bg);border-radius:10px;padding:10px 12px;margin-bottom:8px}.msg .s{font-size:11.5px;color:var(--mute)}
+/* Téléphone (associé) */
+.phone{width:375px;max-width:100%;margin:0 auto;border:10px solid #111;border-radius:42px;overflow:hidden;background:var(--bg);box-shadow:0 30px 60px #0002}
+.phone .top{padding:12px 16px}.phone .wrap{padding:18px 14px 30px}
+.steps{display:flex;gap:6px;margin:0 0 14px}.steps div{flex:1;font-size:11px;color:var(--mute)}
+.steps i{display:block;height:4px;border-radius:9px;background:var(--gray);margin-bottom:5px}.steps .d i{background:var(--ok)}.steps .c i{background:var(--ink)}.steps .c{color:var(--ink);font-weight:700}
+.drop{border:2px dashed var(--line);border-radius:12px;padding:18px;text-align:center;font-size:13px;color:var(--mute);margin-bottom:14px;background:#fff}
+.drop b{display:block;color:var(--ink);font-size:14px;margin-bottom:2px}
+.ref{background:var(--kobg);color:#7c2214;border-radius:10px;padding:10px 12px;font-size:12.5px;margin-bottom:14px}
+.cap{font-size:12px;color:var(--mute);text-align:center;margin-top:14px}
+.state{display:none}.state.on{display:block}
+@media(max-width:560px){.pay{grid-template-columns:1fr}.qr{max-width:150px}.st{grid-template-columns:26px 1fr}.when{grid-column:2;text-align:left}}
+</style></head><body>
+
+<div class="mq"><b>Proposition graphique</b> · état :
+ <div class="seg" id="seg">
+  <button data-s="a" class="on">Fondateur · action à faire</button>
+  <button data-s="b">Fondateur · bloqué par un associé</button>
+  <button data-s="c">Associé sur mobile</button>
+  <button data-s="d">Dossier terminé</button>
+ </div><a href="/maquettes/formaliste">Console formaliste →</a></div>
+
+<!-- ================= A. Fondateur : virement à faire ================= -->
+<div class="state on" data-s="a">
+<div class="top"><span class="logo"><i></i>Nova Pro</span><span class="me">Camille Durand <span class="av">CD</span></span></div>
+<div class="wrap">
+ <div class="co"><div class="sub">Dépôt de capital · 5 000 €</div><h1>Studio Nova SAS</h1></div>
+
+ <div class="now">
+  <div class="eb">À faire maintenant</div>
+  <h2>Virez votre apport de 4 000 €</h2>
+  <p class="why">C’est la dernière action qui vous concerne : Hugo a déjà versé sa part.</p>
+  <div class="pay">
+   <dl><dt>IBAN</dt><dd><b class="mono">FR76 1695 8000 0142 8812 3456 789</b> <button class="lnk">Copier</button></dd>
+    <dt>Montant</dt><dd><b>4 000,00 €</b> exactement</dd><dt>Bénéficiaire</dt><dd>Camille Durand</dd><dt>Libellé</dt><dd class="mono">DC-2026-0007</dd></dl>
+   <div class="qr" data-qr></div>
+  </div>
+  <ul class="rules"><li>Depuis un compte <b>à votre nom</b></li><li>Virement instantané conseillé : reçu en quelques secondes</li><li>Scannez le QR code avec l’appli de votre banque : tout est pré-rempli</li></ul>
+  <button class="btn big">J’ai fait le virement</button>
+  <div class="after">Ensuite : attestation de dépôt sous 3 jours ouvrés. Nous vous écrivons à chaque étape.</div>
+ </div>
+
+ <div class="zone">Où en est le dossier</div>
+ <div class="frise">
+  <button class="fold" data-fold="a"><span><b>✓</b> 2 étapes terminées · documents signés, identités vérifiées</span><span>Voir</span></button>
+  <div class="hide" data-folded="a">
+   <div class="st done"><span class="dot">✓</span><div><b>Documents de la société</b><span class="s">Statuts, mandat et domiciliation signés par les 2 associés</span></div><div class="when">mer. 18 nov.</div></div>
+   <div class="st done"><span class="dot">✓</span><div><b>Identité des associés</b><span class="s">Vérification d’identité et justificatif de domicile</span></div><div class="when">ven. 20 nov.</div></div>
+  </div>
+  <div class="st cur"><span class="dot">3</span><div><b>Apports des associés</b><span class="s">1 000 € reçus sur 5 000 €</span>
+   <ul class="sub-l"><li><span>Camille Durand (vous) · 4 000 €</span><span class="wt">À virer</span></li><li><span>Hugo Petit · 1 000 €</span><span class="ok">Reçu ✓</span></li></ul></div><div class="when">aujourd’hui</div></div>
+  <div class="st goal"><span class="dot">★</span><div><b>Attestation de dépôt</b><span class="s">Le document à joindre à l’immatriculation</span></div><div class="when">estimée<br><b>ven. 27 nov.</b></div></div>
+  <div class="st todo"><span class="dot">5</span><div><b>Immatriculation</b><span class="s">Nous nous en occupons · environ 7 jours ouvrés</span></div><div class="when">≈ mar. 8 déc.</div></div>
+  <div class="st goal"><span class="dot">★</span><div><b>Capital sur votre compte pro</b><span class="s">Disponible pour démarrer l’activité</span></div><div class="when">estimé<br><b>ven. 11 déc.</b></div></div>
+ </div>
+
+ <div class="zone">Mon dossier</div>
+ <div class="acc">
+  <details><summary>Documents<span>7 validés</span></summary><div class="in">
+   <div class="row"><span>Statuts · mandat de dépôt · domiciliation</span><span class="pill ok">Signés</span></div>
+   <div class="row"><span>Vos pièces (identité, domicile)</span><span class="pill ok">Validées</span></div>
+   <div class="row"><span>Pièces d’Hugo Petit</span><span class="pill ok">Validées</span></div></div></details>
+  <details><summary>Messages de l’équipe<span>1 message</span></summary><div class="in">
+   <div class="msg"><div class="s">Nova Pro · ven. 20 nov.</div>Bonne nouvelle : toutes les identités sont vérifiées, vous pouvez faire votre virement.</div>
+   <div class="s" style="font-size:12px;color:var(--mute)">Pour répondre, répondez simplement à l’email reçu.</div></div></details>
+  <details><summary>Historique<span>9 événements</span></summary><div class="in">
+   <div class="row"><span>Apport d’Hugo Petit reçu</span><span class="s">sam. 21 nov.</span></div>
+   <div class="row"><span>Identités vérifiées</span><span class="s">ven. 20 nov.</span></div>
+   <div class="row"><span>Statuts signés par tous les associés</span><span class="s">mer. 18 nov.</span></div></div></details>
+ </div>
+</div></div>
+
+<!-- ================= B. Fondateur : bloqué par un associé ================= -->
+<div class="state" data-s="b">
+<div class="top"><span class="logo"><i></i>Nova Pro</span><span class="me">Camille Durand <span class="av">CD</span></span></div>
+<div class="wrap">
+ <div class="co"><div class="sub">Dépôt de capital · 5 000 €</div><h1>Studio Nova SAS</h1></div>
+
+ <div class="now wait">
+  <div class="eb">Rien à faire de votre côté</div>
+  <h2>Hugo doit remplacer son justificatif de domicile</h2>
+  <p class="why"><b>Motif :</b> le document date de plus de 3 mois. Hugo a reçu un email avec la marche à suivre.</p>
+  <div class="meta"><span>En attente <b>depuis 2 jours</b></span><span>Dernière relance : <b>hier</b></span></div>
+  <button class="btn ghost big">Relancer Hugo</button>
+  <div class="after">Le dossier reprend dès qu’il a déposé le nouveau document.</div>
+ </div>
+
+ <div class="zone">Où en est le dossier</div>
+ <div class="frise">
+  <div class="st done"><span class="dot">✓</span><div><b>Documents de la société</b><span class="s">Signés par les 2 associés</span></div><div class="when">mer. 18 nov.</div></div>
+  <div class="st cur"><span class="dot">2</span><div><b>Identité des associés</b>
+   <ul class="sub-l"><li><span>Camille Durand (vous)</span><span class="ok">Vérifiée ✓</span></li><li><span>Hugo Petit · justificatif de domicile</span><span class="ko">À remplacer</span></li></ul></div><div class="when">en pause</div></div>
+  <div class="st todo"><span class="dot">3</span><div><b>Apports des associés</b><span class="s">Les IBAN de dépôt s’ouvrent après la vérification</span></div><div class="when"></div></div>
+  <div class="st goal"><span class="dot">★</span><div><b>Attestation de dépôt</b><span class="s">Recalculée dès qu’Hugo aura agi</span></div><div class="when">estimée<br><b>mer. 2 déc.</b></div></div>
+  <div class="st goal"><span class="dot">★</span><div><b>Capital sur votre compte pro</b></div><div class="when">estimé<br><b>mer. 16 déc.</b></div></div>
+ </div>
+
+ <div class="zone">Mon dossier</div>
+ <div class="acc">
+  <details><summary>Documents<span>1 à remplacer · 5 validés</span></summary><div class="in">
+   <div class="row"><span>Justificatif de domicile · Hugo Petit</span><span class="pill ko">Refusé</span></div>
+   <div class="row"><span>Statuts · mandat · domiciliation</span><span class="pill ok">Signés</span></div></div></details>
+  <details><summary>Messages de l’équipe<span>aucun</span></summary><div class="in">Aucun message pour l’instant.</div></details>
+  <details><summary>Historique<span>6 événements</span></summary><div class="in"><div class="row"><span>Justificatif d’Hugo refusé</span><span class="s">sam. 21 nov.</span></div></div></details>
+ </div>
+</div></div>
+
+<!-- ================= C. Associé sur mobile ================= -->
+<div class="state" data-s="c"><div class="wrap" style="max-width:none;padding-top:30px">
+ <div class="phone">
+  <div class="top"><span class="logo"><i></i>Nova Pro</span><span class="me"><span class="av">HP</span></span></div>
+  <div class="wrap">
+   <div class="co"><div class="sub">Bonjour Hugo · associé de</div><h1 style="font-size:21px;margin-bottom:14px">Studio Nova SAS</h1></div>
+   <div class="steps"><div class="d"><i></i>Identité</div><div class="c"><i></i>Domicile</div><div><i></i>Virement</div></div>
+   <div class="now" style="padding:18px">
+    <div class="eb" style="color:var(--ko)">À corriger · 2 sur 3</div>
+    <h2 style="font-size:19px">Un justificatif de domicile récent</h2>
+    <div class="ref"><b>Refusé :</b> votre facture date d’août. Il faut un document de moins de 3 mois.</div>
+    <div class="drop"><b>📷 Prendre en photo</b>ou choisir un fichier</div>
+    <ul class="rules"><li>Facture d’énergie, internet ou quittance de loyer</li><li>À votre nom : <b>Hugo Petit</b></li><li>Adresse : <b>9 quai Perrache, Lyon</b></li></ul>
+    <button class="btn big" style="width:100%">Envoyer</button>
+    <div class="after">Contrôle automatique immédiat, puis le virement de vos <b>1 000 €</b>.</div>
+   </div>
+   <div class="cap"><a href="#" style="color:var(--accent);font-weight:600">Suivre le dossier de la société</a></div>
+  </div>
+ </div>
+ <p class="cap" style="max-width:420px;margin:18px auto 0">L’associé n’a qu’un parcours en 3 étapes, sans tableau de bord. Le fondateur garde la vue complète.</p>
+</div></div>
+
+<!-- ================= D. Terminé ================= -->
+<div class="state" data-s="d">
+<div class="top"><span class="logo"><i></i>Nova Pro</span><span class="me">Camille Durand <span class="av">CD</span></span></div>
+<div class="wrap">
+ <div class="co"><div class="sub">Dépôt de capital</div><h1>Studio Nova SAS</h1></div>
+ <div class="now done" style="text-align:center;padding:36px 24px">
+  <div style="font-size:40px;line-height:1">🎉</div>
+  <div class="eb" style="margin-top:12px">Dossier terminé</div>
+  <h2>Vos 5 000 € sont sur votre compte pro</h2>
+  <p class="why">Versés le ven. 11 déc. La société peut démarrer son activité.</p>
+  <button class="btn big">Voir mon compte pro</button>
+  <div class="after"><a href="#" style="color:var(--accent);font-weight:600">Télécharger l’attestation de dépôt</a> · <a href="#" style="color:var(--accent);font-weight:600">Historique du dossier</a></div>
+ </div>
+</div></div>
+
+<script>
+const seg=document.getElementById('seg');
+const show=s=>{seg.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.s==s));document.querySelectorAll('.state').forEach(x=>x.classList.toggle('on',x.dataset.s==s));try{history.replaceState(null,'','#'+s)}catch{}};
+seg.onclick=e=>{const b=e.target.closest('button');if(b)show(b.dataset.s)};
+const fromHash=()=>{if(/^#[a-d]$/.test(location.hash))show(location.hash.slice(1))};fromHash();addEventListener('hashchange',fromHash);
+document.addEventListener('click',e=>{const f=e.target.closest('[data-fold]');if(!f)return;const p=document.querySelector(`[data-folded="${f.dataset.fold}"]`);p.classList.toggle('hide');f.lastElementChild.textContent=p.classList.contains('hide')?'Voir':'Masquer'});
+// QR SEPA factice (illustratif)
+document.querySelectorAll('[data-qr]').forEach(el=>{const n=25;let s=7,r=()=>(s=(s*9301+49297)%233280)/233280,c='';
+ const fin=(x,y)=>x<7&&y<7||x>=n-7&&y<7||x<7&&y>=n-7;
+ for(let y=0;y<n;y++)for(let x=0;x<n;x++){let on;if(fin(x,y)){const a=x<7?x:x-(n-7),b=y<7?y:y-(n-7);on=a==0||a==6||b==0||b==6||(a>1&&a<5&&b>1&&b<5)}else on=r()>.52;if(on)c+=`<rect x="${x}" y="${y}" width="1" height="1"/>`}
+ el.innerHTML=`<svg viewBox="0 0 ${n} ${n}" shape-rendering="crispEdges">${c}</svg>QR SEPA · 4 000 €`});
+</script>
+</body></html>

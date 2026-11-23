@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Proposition – Console formaliste simplifiée</title>
+<link rel="stylesheet" href="/nova.css">
+<style>
+body{display:block}
+.mq{background:#fffbe8;border-bottom:1px dashed #d8c16a;padding:8px 20px;display:flex;gap:10px;align-items:center;font-size:12.5px}
+.mq b{color:var(--warn)}.mq a{margin-left:auto;color:var(--warn);font-weight:600}
+/* Barre du haut : navigation seulement */
+.bar{display:flex;align-items:center;gap:22px;padding:0 20px;height:54px;background:var(--side);color:#fff;position:sticky;top:0;z-index:5}
+.bar .logo{display:flex;align-items:center;gap:8px;font-weight:700;padding:0;font-size:15px}.bar .logo i{width:18px;height:18px;border-radius:5px}
+.nav{display:flex;gap:4px;height:100%}.nav a{display:flex;align-items:center;gap:6px;padding:0 12px;color:var(--sideink);font-weight:500;border-bottom:2px solid transparent}
+.nav a.on{color:#fff;border-color:#fff}.nav .n{background:#2c2c2c;color:#fff;border-radius:99px;font-size:11px;padding:1px 7px;font-weight:700}
+.nav .n.r{background:var(--ko)}
+.bar .right{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--sideink)}
+.demo{position:relative}.demo summary{list-style:none;cursor:pointer;padding:6px 11px;border-radius:8px;background:#1d1d1d;border:1px dashed #444;color:#d9d9d4}
+.demo summary::-webkit-details-marker{display:none}
+.demo .menu{position:absolute;right:0;top:38px;background:#fff;color:var(--ink);border-radius:12px;box-shadow:0 14px 40px #0003;padding:8px;width:250px;display:grid;gap:2px}
+.demo .menu button{text-align:left;border:0;background:none;font:inherit;padding:8px 10px;border-radius:8px;cursor:pointer}.demo .menu button:hover{background:var(--bg)}
+.demo .menu small{color:var(--mute);padding:4px 10px 2px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;font-weight:700}
+.av{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:#2a2a2a;color:#fff;font-weight:700;font-size:11px;margin:0}
+/* Mise en page */
+.lay{display:grid;grid-template-columns:320px minmax(0,1fr);gap:18px;padding:18px 20px;max-width:1360px;margin:0 auto;align-items:start}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px}
+/* File */
+.q{padding:12px;position:sticky;top:72px}
+.segs{display:grid;grid-template-columns:repeat(3,1fr);background:var(--bg);border-radius:10px;padding:3px;margin-bottom:10px}
+.segs button{border:0;background:none;font:inherit;font-size:12.5px;font-weight:600;padding:7px 4px;border-radius:8px;cursor:pointer;color:var(--mute)}
+.segs button.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px #0001}
+.search{margin-bottom:8px;padding:8px 11px;font-size:13px}
+.qi{display:grid;grid-template-columns:1fr auto;gap:2px 8px;width:100%;text-align:left;border:0;border-radius:10px;background:none;padding:10px;font:inherit;cursor:pointer}
+.qi+.qi{border-top:1px solid var(--line);border-radius:0}.qi:hover{background:#fafaf8}
+.qi.on{background:var(--bg);border-radius:10px;box-shadow:inset 3px 0 0 var(--ink)}
+.qi b{font-size:13.5px}.qi .nx{grid-column:1/-1;font-size:12.5px;color:#4a4a45}.qi .ag{font-size:11.5px;color:var(--mute);text-align:right}
+.qi .late{color:var(--ko);font-weight:700}
+.dotl{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--ko);margin-right:5px;vertical-align:1px}
+.qempty{font-size:12.5px;color:var(--mute);padding:10px}
+/* Détail */
+.hd{padding:20px 22px}
+.hd .r1{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.hd h1{font-size:21px;margin:0;letter-spacing:-.02em}.hd h1 span{font-size:13px;color:var(--mute);font-weight:500}
+.hd .ad{font-size:12.5px;color:var(--mute)}
+.kpis{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:10px;margin-top:16px}
+.kpi{background:var(--bg);border-radius:10px;padding:11px 13px}.kpi .l{font-size:12px;color:var(--mute)}.kpi .v{font-weight:700;font-size:16px;margin-top:2px}
+.kpi .prog{height:5px;margin:7px 0 0}
+.sees{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-top:14px;border-left:3px solid var(--accent);background:#f4f1ff;padding:9px 12px;border-radius:0 8px 8px 0;font-size:13px}
+.sees a{color:var(--accent);font-weight:600;white-space:nowrap}
+.tech{margin-top:10px;font-size:12px;color:var(--mute)}.tech summary{cursor:pointer}.tech .mono{font-family:ui-monospace,Menlo,monospace}
+.sec{display:block;margin-top:16px}.sec>h3{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute);margin:0 0 8px 4px}
+/* Prochaines actions */
+.act{display:grid;grid-template-columns:96px minmax(0,1fr) auto;gap:14px;align-items:center;padding:14px 18px}
+.act+.act{border-top:1px solid var(--line)}
+.act .t b{display:block;font-size:13.5px}.act .t .s{font-size:12.5px;color:var(--mute)}
+.act .t q{display:block;font-size:12.5px;color:#4a4a45;margin-top:4px;quotes:"« " " »"}
+.act .bt{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.tag{display:inline-block;font-size:11px;font-weight:700;padding:3px 8px;border-radius:99px;text-align:center}
+.tag.me{background:var(--ink);color:#fff}.tag.cl{background:var(--warnbg);color:var(--warn)}.tag.pt{background:#e4ecff;color:#2845b8}.tag.nt{background:#efe6ff;color:#5b3df5}.tag.ok{background:var(--okbg);color:var(--ok)}.tag.ko{background:var(--kobg);color:var(--ko)}
+.grp{padding:9px 18px;background:#fafaf8;border-top:1px solid var(--line);font-size:11.5px;font-weight:700;color:var(--mute);text-transform:uppercase;letter-spacing:.05em}
+.grp:first-child{border-top:0;border-radius:14px 14px 0 0}
+.lateb{color:var(--ko);font-weight:600}
+/* Associés et pièces */
+.who{padding:14px 18px}.who+.who{border-top:1px solid var(--line)}
+.who .r1{display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap}
+.who .r1 b{font-size:13.5px}.who .r1 .s{font-size:12.5px;color:var(--mute)}
+.docs{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.doc{font-size:12px;border:1px solid var(--line);border-radius:8px;padding:4px 9px;background:#fff}
+.doc.ok{color:var(--ok);border-color:#cde9d7;background:#f6fcf8}.doc.ko{color:var(--ko);border-color:#f3c9c0;background:#fff7f5;font-weight:600}.doc.wt{color:#2845b8;border-color:#cfdcff;background:#f6f8ff}
+.why{font-size:12.5px;color:#7c2214;margin-top:6px}
+.more{padding:12px 18px;border-top:1px solid var(--line);font-size:13px}.more summary{cursor:pointer;color:var(--mute);font-weight:600}
+.row{display:flex;justify-content:space-between;gap:10px;padding:6px 0;font-size:12.5px;border-top:1px solid var(--line)}.row:first-of-type{border-top:0}
+.foot{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+.foot details{padding:14px 18px;font-size:13px}.foot summary{cursor:pointer;font-weight:600}
+.foot .dm summary{color:var(--warn)}.foot .dm{border-style:dashed;border-color:#e3d38f;background:#fffdf3}
+@media(max-width:1000px){.lay{grid-template-columns:1fr}.q{position:static}.kpis{grid-template-columns:1fr}.act{grid-template-columns:1fr}.act .bt{justify-content:flex-start}.foot{grid-template-columns:1fr}.nav a:not(.on){display:none}}
+</style></head><body>
+
+<div class="mq"><b>Proposition graphique</b> · console formaliste, dossier « Studio Nova SAS » ouvert<a href="/maquettes/client">← Vue client</a></div>
+
+<div class="bar">
+ <span class="logo"><i></i>Nova Pro</span>
+ <nav class="nav"><a class="on">Dossiers <span class="n">3</span></a><a>Boîte Swan <span class="n r">2</span></a><a>Refus</a></nav>
+ <div class="right">
+  <details class="demo"><summary>Mode démo ▾</summary><div class="menu">
+   <small>Horloge · lun. 23 nov.</small><button>Avancer d’un jour</button><button>Revenir à aujourd’hui</button>
+   <small>Créer un dossier</small><button>Statuts générés par Nova Pro</button><button>Statuts fournis par le client</button>
+   <small>Faire avancer ce dossier</small><button>Simuler Swan, notaire, client…</button></div></details>
+  <span class="av">ML</span>
+ </div>
+</div>
+
+<div class="lay">
+ <!-- File : 3 vues, une ligne = la prochaine étape -->
+ <div class="panel q">
+  <div class="segs" id="segs"><button data-t="me" class="on">À moi · 3</button><button data-t="wait">En attente · 5</button><button data-t="done">Terminés · 4</button></div>
+  <input class="search" placeholder="Rechercher une société, une réf.">
+  <div id="list"></div>
+ </div>
+
+ <div>
+  <!-- En-tête -->
+  <div class="panel hd">
+   <div class="r1"><div><div class="ad">DC-2026-0007 · 12 rue de la Paix, 75002 Paris</div><h1>Studio Nova SAS <span>SAS · 2 associés</span></h1></div><span class="pill" style="background:var(--warnbg);color:var(--warn)">Pièces en vérification · 2 j ouvrés</span></div>
+   <div class="kpis">
+    <div class="kpi"><div class="l">Capital reçu</div><div class="v">1 000 € <span style="font-weight:400;color:var(--mute);font-size:13px">sur 5 000 €</span></div><div class="prog"><i style="width:20%"></i></div></div>
+    <div class="kpi"><div class="l">Attestation</div><div class="v">≈ ven. 27 nov.</div></div>
+    <div class="kpi"><div class="l">Capital libéré</div><div class="v">≈ ven. 11 déc.</div></div>
+   </div>
+   <div class="sees"><span><b>Le fondateur voit :</b> « Hugo doit remplacer son justificatif de domicile » · bouton Relancer</span><a href="/maquettes/client#b">Vue client ↗</a></div>
+   <details class="tech"><summary>Détails techniques</summary><div style="margin-top:6px">ID Swan <span class="mono">62abdaca-22d0-4b80-937e-bb6bf5ba98a</span> · statut <span class="mono">WaitingForAdditionalInformation</span> depuis le sam. 21 nov.</div></details>
+  </div>
+
+  <!-- Une seule liste d’actions, triée par responsable -->
+  <div class="sec"><h3>Prochaines actions</h3>
+   <div class="panel">
+    <div class="grp">À vous · 3</div>
+    <div class="act"><span class="tag ko">Délai Swan</span><div class="t"><b>Swan n’a pas répondu sur la domiciliation</b><span class="s">Ticket #221907 · réponse prévue le jeu. 19 nov. · <span class="lateb">2 j ouvrés de retard</span> · relance à support@swan</span></div><div class="bt"><button class="btn sm">Relancer Swan</button><button class="btn ghost sm">Acquitter</button></div></div>
+    <div class="act"><span class="tag me">Email Swan</span><div class="t"><b>Informations complémentaires demandées</b><span class="s">Ticket #222812 · reçu il y a 1 j ouvré</span><q>Bonjour, pour avancer sur le dépôt de Studio Nova SAS, nous avons besoin d’un justificatif de domicile récent…</q></div><div class="bt"><button class="btn sm">Traiter</button></div></div>
+    <div class="act"><span class="tag me">Statuts</span><div class="t"><b>Statuts refusés par Swan : objet social incomplet</b><span class="s">Régénérer puis faire re-signer les 2 associés</span></div><div class="bt"><button class="btn sm">Régénérer</button></div></div>
+    <div class="grp">En attente des autres · 2</div>
+    <div class="act"><span class="tag cl">Client</span><div class="t"><b>Hugo Petit · remplacer son justificatif de domicile</b><span class="s">Depuis 2 j ouvrés · relancé hier</span></div><div class="bt"><button class="btn ghost sm">Relancer</button></div></div>
+    <div class="act"><span class="tag pt">Swan</span><div class="t"><b>Vérification des pièces de Camille Durand</b><span class="s">Transmises il y a 1 j ouvré · réponse attendue mar. 24 nov.</span></div><div class="bt"></div></div>
+   </div>
+  </div>
+
+  <!-- Associés et pièces : une ligne par personne, les pièces en étiquettes -->
+  <div class="sec"><h3>Associés et pièces</h3>
+   <div class="panel">
+    <div class="who"><div class="r1"><span><b>Camille Durand</b> <span class="tag" style="background:var(--gray);color:#4a4a45">Fondateur</span></span><span class="s">4 000 € · IBAN ouvert après vérification</span></div>
+     <div class="docs"><span class="doc ok">✓ Identité</span><span class="doc wt">⏳ Justificatif de domicile · chez Swan</span><span class="doc ok">✓ Signature</span></div></div>
+    <div class="who"><div class="r1"><span><b>Hugo Petit</b></span><span class="s">1 000 € · reçu le sam. 21 nov.</span></div>
+     <div class="docs"><span class="doc ok">✓ Identité</span><span class="doc ko">✕ Justificatif de domicile · refusé 1 fois</span><span class="doc ok">✓ Signature</span></div>
+     <div class="why">Motif : document de plus de 3 mois (facture d’août).</div></div>
+    <div class="who"><div class="r1"><span><b>Société</b></span><span class="s">Pièces générées par Nova Pro</span></div>
+     <div class="docs"><span class="doc ko">✕ Statuts · à régénérer</span><span class="doc ok">✓ Mandat de dépôt</span><span class="doc ok">✓ Domiciliation</span></div></div>
+   </div>
+  </div>
+
+  <div class="foot">
+   <details class="panel"><summary>Historique et messages envoyés (14)</summary>
+    <div style="margin-top:10px"><div class="row"><span>Statuts refusés par Swan</span><span>lun. 23 nov.</span></div><div class="row"><span>Relance envoyée à Hugo Petit</span><span>dim. 22 nov.</span></div><div class="row"><span>Apport d’Hugo Petit reçu</span><span>sam. 21 nov.</span></div></div></details>
+   <details class="panel dm"><summary>Mode démo · simuler les autres acteurs</summary><div style="margin-top:8px;color:var(--mute);font-size:12.5px">Swan valide / refuse une pièce, le notaire répond, un associé dépose… Masqué en production.</div></details>
+  </div>
+ </div>
+</div>
+
+<script>
+const Q={
+ me:[{n:'Studio Nova SAS',r:'0007',nx:'Swan en retard · 1 email à traiter',a:'2 j',late:1,on:1},
+     {n:'Brasserie Okto SAS',r:'0005',nx:'Escalade Swan à envoyer',a:'4 j',late:1},
+     {n:'Atelier Lumen SAS',r:'0004',nx:'Statuts générés à corriger',a:'1 j'}],
+ wait:[{n:'Verde Mobilité SASU',r:'0006',nx:'Client · virement de 2 000 €',a:'3 j'},{n:'Pixel & Co SAS',r:'0008',nx:'Swan · vérification des pièces',a:'1 j'},{n:'Kalo Studio SAS',r:'0009',nx:'Client · signature des statuts',a:'auj.'},{n:'Studio Nova SAS',r:'0003',nx:'Notaire · réception des fonds',a:'2 j'},{n:'Okto Bis SAS',r:'0010',nx:'Client · immatriculation (Kbis)',a:'5 j'}],
+ done:[{n:'Nova Conseil SAS',r:'0002',nx:'Capital viré le ven. 20 nov.',a:''},{n:'Lune SARL',r:'0001',nx:'Capital viré le mer. 12 nov.',a:''},{n:'Atelier Nord SAS',r:'0011',nx:'Annulé · fonds restitués',a:''},{n:'Bento SAS',r:'0012',nx:'Capital viré le lun. 3 nov.',a:''}]};
+const draw=t=>{document.getElementById('list').innerHTML=Q[t].map(x=>`<button class="qi ${x.on?'on':''}"><b>${x.late?'<span class="dotl"></span>':''}${x.n}</b><span class="ag ${x.late?'late':''}">${x.a}</span><span class="nx">${x.nx}</span></button>`).join('');
+ document.querySelectorAll('#segs button').forEach(b=>b.classList.toggle('on',b.dataset.t==t))};
+document.getElementById('segs').onclick=e=>{const b=e.target.closest('button');if(b)draw(b.dataset.t)};
+draw('me');
+</script>
+</body></html>
