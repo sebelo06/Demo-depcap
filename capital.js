@@ -686,6 +686,23 @@ const PREVENT = {
   DeclaredAmountMismatch: 'Rappeler capital et répartition exacts au moment du dépôt des statuts.',
   InvalidOrMissingData: 'Vérifier que le nom complet est lisible avant l’envoi.',
 };
+// Jours ouvrés écoulés entre deux dates, en décimal (week-ends exclus)
+const bdBetween = (a, b) => { let ms = 0; for (let d = new Date(a); d < b;) { const e = new Date(Math.min(+b, new Date(d).setUTCHours(24, 0, 0, 0))); if (d.getUTCDay() % 6) ms += e - d; d = e; } return ms / 864e5; };
+// Revue du dossier par Swan (PendingInternalReview) : de l'entrée en revue à la décision (notaire, complément ou annulation).
+// status_log ne garde que le dernier passage par chaque statut : on mesure la dernière revue de chaque dossier.
+function reviewDelays(since) {
+  const OUT = ['WaitingForNotaryShareDepositCertificate', 'WaitingForAdditionalInformation', 'Canceled'], t = now(), done = [], open = [];
+  for (const c of all("SELECT status, status_log FROM cd_cases WHERE status_log LIKE '%PendingInternalReview%'")) {
+    const L = JSON.parse(c.status_log || '{}'), start = parseTs(L.PendingInternalReview);
+    if (!start || start.toISOString() < since.replace(' ', 'T')) continue;
+    if (c.status === 'PendingInternalReview') { open.push(bdBetween(start, t)); continue; }
+    const end = OUT.map((k) => parseTs(L[k])).filter((d) => d && d >= start).sort((a, b) => a - b)[0];
+    if (end) done.push(bdBetween(start, end));
+  }
+  const avg = done.length ? done.reduce((a, x) => a + x, 0) / done.length : null;
+  return { avg, done: done.length, over: done.filter((x) => x > SLA.review).length, open: open.length, openLate: open.filter((x) => x > SLA.review).length, sla: SLA.review };
+}
+
 export function refusalDashboard({ days = 90, source = 'all' } = {}) {
   const since = new Date(now().getTime() - Number(days) * 864e5).toISOString().replace('T', ' ').slice(0, 19);
   const rows = all(`SELECT r.*, d.type, d.status AS doc_status, d.refusals AS doc_refusals, c.ref, c.company_name, c.id AS cid, s.name AS sh_name
@@ -712,7 +729,7 @@ export function refusalDashboard({ days = 90, source = 'all' } = {}) {
     kpis: { refusals: rows.length, submitted: totalSubmitted, rate: totalSubmitted ? rows.length / totalSubmitted : 0,
       firstTime: decided.length ? decided.filter((d) => !d.refusals).length / decided.length : null, decided: decided.length,
       cases: new Set(rows.map((r) => r.cid)).size, casesTotal: new Set(D.map((d) => d.case_id)).size,
-      repeat: new Set(rows.filter((r) => r.doc_refusals >= 2).map((r) => r.document_id)).size },
+      repeat: new Set(rows.filter((r) => r.doc_refusals >= 2).map((r) => r.document_id)).size, review: reviewDelays(since) },
     bySource: count(rows, 'source'),
     byType, byReason,
     matrix: { types: byType.map((t) => ({ type: t.type, label: t.label })), reasons: byReason.map((r) => ({ code: r.code, title: r.title })),

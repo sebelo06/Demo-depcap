@@ -268,7 +268,9 @@ function nextCard({me,others},closed){
  const i=me[0]||[...others].sort((a,b)=>!!b.late-!!a.late)[0];
  if(!i)return '';
  const mine=!!me[0],lbl=mine?'Prochaine action · à vous':'Prochaine action · en attente de';
- return `<div class="next ${mine?'':'wait'} ${i.late?'late':''}"><div class="lb">${lbl} ${pill(i.who)}${i.late?' · en retard':''}${me.length>1?` <span style="margin-left:auto;text-transform:none;letter-spacing:0;font-weight:500">+ ${me.length-1} autre${me.length>2?'s':''} action${me.length>2?'s':''} pour vous</span>`:''}</div>
+ // « à vous » suffit (pas de pastille « Nous ») ; un retard sur une action à nous est toujours un délai Swan dépassé
+ const late=i.late?(mine?' · Swan en retard':' · en retard'):'';
+ return `<div class="next ${mine?'':'wait'} ${i.late?'late':''}"><div class="lb">${lbl}${mine?'':' '+pill(i.who)}${late}${me.length>1?` <span style="margin-left:auto;text-transform:none;letter-spacing:0;font-weight:500">+ ${me.length-1} autre${me.length>2?'s':''} action${me.length>2?'s':''} pour vous</span>`:''}</div>
   <div><b>${esc(i.title)}</b><div class="s">${esc(i.k)} · ${i.sub}</div></div><div class="bt">${i.bt||''}</div></div>`}
 // Suivi du dossier : les 7 étapes, avec la date de chaque étape faite et l'estimation des suivantes
 const SHORT={docs:'Documents',kyc:'Identité',pay:'Apports',review:'Vérification Swan',extra:'Revue complémentaire',cert:'Attestation notaire',kbis:'Kbis',release:'Capital libéré'};

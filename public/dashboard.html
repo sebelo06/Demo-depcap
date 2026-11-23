@@ -16,7 +16,7 @@ body{display:block}
 .seg{display:inline-flex;background:var(--card);border:1px solid var(--line);border-radius:9px;padding:2px}
 .seg button{white-space:nowrap;border:0;background:none;padding:6px 11px;font:inherit;font-size:12.5px;border-radius:7px;cursor:pointer;color:var(--text-secondary)}
 .seg button[aria-pressed="true"]{background:var(--ink);color:#fff}
-.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px}
+.kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:16px}
 .kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
 .kpi .v{font-size:28px;font-weight:700;letter-spacing:-.02em;margin:4px 0 2px;font-variant-numeric:tabular-nums}
 .kpi .s{font-size:12px;color:var(--text-muted)}
@@ -84,7 +84,11 @@ function draw(D){const k=D.kpis;
  TIP=D}
 function kpis(k){const T=(l,v,s)=>`<div class="kpi"><div class="lbl">${l}</div><div class="v">${v}</div><div class="s">${s}</div></div>`;
  return `<div class="kpis">${T('Refus',k.refusals,k.repeat?`${k.repeat} document${k.repeat>1?'s':''} refusé${k.repeat>1?'s':''} 2 fois ou plus`:'aucun document refusé deux fois')}${T('Taux de refus',pct(k.rate),`${k.refusals} refus sur ${k.submitted} versions soumises`)}
-  ${T('Acceptés du premier coup',pct(k.firstTime),`sur ${k.decided} document${k.decided>1?'s':''} validé${k.decided>1?'s':''}`)}${T('Dossiers touchés',`${k.cases}<span style="font-size:16px;color:var(--text-muted)"> / ${k.casesTotal}</span>`,'au moins un refus sur la période')}</div>`}
+  ${T('Acceptés du premier coup',pct(k.firstTime),`sur ${k.decided} document${k.decided>1?'s':''} validé${k.decided>1?'s':''}`)}${T('Dossiers touchés',`${k.cases}<span style="font-size:16px;color:var(--text-muted)"> / ${k.casesTotal}</span>`,'au moins un refus sur la période')}${reviewKpi(k.review,T)}</div>`}
+// Délai de revue du dossier par Swan (en jours ouvrés), comparé à l'engagement de 2 jours
+function reviewKpi(r,T){if(!r)return '';const j=x=>x<0.05?'< 0,1 j':`${x.toLocaleString('fr-FR',{maximumFractionDigits:1})} j`,late=r.over+r.openLate;
+ const parts=[r.done?`moyenne sur ${r.done} revue${r.done>1?'s':''}`:'aucune revue terminée',r.open?`${r.open} en cours`:'',late?`<span style="color:var(--ko)">${late} au-delà de ${r.sla} j ouvrés</span>`:`délai de ${r.sla} j ouvrés tenu`].filter(Boolean);
+ return T('Revue Swan du dossier',r.avg==null?'—':j(r.avg)+'<span style="font-size:16px;color:var(--text-muted)"> ouvrés</span>',parts.join(' · '))}
 // Barres : échelle commune au maximum de la carte, valeur et détail en texte (jamais la couleur seule)
 function bars(xs){const max=Math.max(...xs.map(x=>x.n),1);
  return xs.map(x=>`<div class="bar" tabindex="0" data-tip="${esc(x.key)}"><span class="nm" title="${esc(x.name)}">${esc(x.name)}</span><span class="tr"><span class="fill" style="width:${x.n/max*100}%"></span></span><span class="val">${x.label}</span>${x.sub?`<span class="sub2">${esc(x.sub)}</span>`:''}</div>`).join('')}
