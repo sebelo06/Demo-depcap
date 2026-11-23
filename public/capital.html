@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nova Pro – Dépôt de capital</title>
+<style>
+:root{--bg:#f4f4f2;--card:#fff;--ink:#0d0d0d;--mute:#76766f;--line:#e8e8e4;--side:#0d0d0d;--sideink:#a9a9a2;
+ --accent:#5b3df5;--ok:#0e8a4f;--okbg:#e3f5ea;--ko:#c8321e;--kobg:#fde8e4;--warn:#9a6700;--warnbg:#fdf1d2;--gray:#ecece8}
+@font-face{font-family:NovaInter;font-weight:400;src:url(/fonts/inter-latin-400-normal.woff2) format("woff2")}
+@font-face{font-family:NovaInter;font-weight:700;src:url(/fonts/inter-latin-700-normal.woff2) format("woff2")}
+@font-face{font-family:NovaSerif;font-weight:400;src:url(/fonts/source-serif-4-latin-400-normal.woff2) format("woff2")}
+@font-face{font-family:NovaSerif;font-weight:700;src:url(/fonts/source-serif-4-latin-700-normal.woff2) format("woff2")}
+@font-face{font-family:NovaRounded;font-weight:400;src:url(/fonts/nunito-latin-400-normal.woff2) format("woff2")}
+@font-face{font-family:NovaRounded;font-weight:700;src:url(/fonts/nunito-latin-700-normal.woff2) format("woff2")}
+*{box-sizing:border-box}
+body{margin:0;font:14px/1.45 NovaInter,"Inter",system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);display:flex;min-height:100vh;-webkit-font-smoothing:antialiased}
+aside{width:236px;background:var(--side);padding:20px 12px;display:flex;flex-direction:column;gap:2px;position:sticky;top:0;height:100vh}
+.logo{color:#fff;font-weight:700;font-size:19px;letter-spacing:-.02em;padding:4px 12px 20px;display:flex;align-items:center;gap:8px}
+.logo i{width:22px;height:22px;border-radius:6px;background:#fff;display:inline-block;position:relative}
+.logo i:after{content:"";position:absolute;inset:6px;background:var(--side);border-radius:50%}
+.org{margin:0 4px 14px;padding:10px 12px;border-radius:10px;background:#1b1b1b;color:#fff}
+.org small{display:block;color:var(--sideink);font-size:11px}
+aside a{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;color:var(--sideink);cursor:pointer;font-weight:500}
+aside a:hover{background:#1b1b1b;color:#fff}aside a.on{background:#262626;color:#fff}
+aside svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.sep{height:1px;background:#222;margin:10px 8px}.badge{margin-top:auto;font-size:11px;color:var(--sideink);padding:0 12px}
+main{flex:1;min-width:0;padding:28px 36px;max-width:1100px}
+header.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px}
+h2{font-size:24px;letter-spacing:-.02em;margin:0}
+.btn{background:var(--ink);color:#fff;border:0;border-radius:8px;padding:9px 16px;font:inherit;font-weight:600;cursor:pointer}
+.btn:hover{background:#2b2b2b}.btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--line)}.btn.ghost:hover{background:var(--gray)}
+.btn.sm{padding:5px 10px;font-size:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;margin-bottom:16px}
+.card h3{margin:0 0 14px;font-size:15px}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));margin-bottom:16px}
+.grid .card{margin:0}.lbl{color:var(--mute);font-size:12.5px;font-weight:500}.big{font-size:30px;font-weight:700;letter-spacing:-.03em;margin:4px 0}
+.hero{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-bottom:16px}.hero .card{margin:0}
+.iban{display:flex;align-items:center;gap:8px;margin-top:10px;padding:9px 12px;background:var(--bg);border-radius:8px;font-size:12.5px;font-family:ui-monospace,Menlo,monospace;justify-content:space-between}
+.iban button{border:0;background:none;color:var(--accent);font-weight:600;cursor:pointer;font:inherit}
+table{width:100%;border-collapse:collapse}th{color:var(--mute);font-weight:500;font-size:12px;text-align:left;padding:0 8px 10px}
+td{padding:12px 8px;border-top:1px solid var(--line)}td.r,th.r{text-align:right;white-space:nowrap}td b{white-space:nowrap}td.r .btn+.btn{margin-left:4px}tbody tr:hover{background:#fafaf8}
+.cr{color:var(--ok);font-weight:600}.db{font-weight:600}
+.pill{display:inline-block;font-size:12px;font-weight:600;padding:3px 9px;border-radius:99px;background:var(--gray);color:#4a4a45}
+.pill.Paid,.pill.Booked,.pill.Enabled,.pill.Opened{background:var(--okbg);color:var(--ok)}
+.pill.Late{background:var(--kobg);color:var(--ko)}.pill.Sent,.pill.Pending,.pill.ConsentPending{background:var(--warnbg);color:var(--warn)}
+.av{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--gray);font-weight:600;font-size:12px;margin-right:10px;vertical-align:middle}
+.sec{display:none}.sec.on{display:block}
+form{display:grid;grid-template-columns:1fr 1fr;gap:12px}form .full{grid-column:1/-1}
+label{display:block;font-size:12.5px;font-weight:600;margin-bottom:5px}
+input,select{width:100%;font:inherit;padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:#fff;color:var(--ink)}
+input:focus{outline:2px solid var(--accent);outline-offset:-1px;border-color:transparent}
+.tabs{display:flex;gap:4px;margin-bottom:16px;border-bottom:1px solid var(--line)}
+.tabs button{border:0;background:none;padding:9px 14px;font:inherit;font-weight:500;color:var(--mute);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tabs button.on{color:var(--ink);border-color:var(--ink)}
+.cardvis{width:260px;height:160px;border-radius:14px;background:linear-gradient(135deg,#1c1c1c,#3a2d9c);color:#fff;padding:18px;display:flex;flex-direction:column;justify-content:space-between;margin-bottom:12px}
+.cards{display:flex;gap:16px;flex-wrap:wrap}.cardvis b{font-size:16px;letter-spacing:.1em}
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 18px;border-radius:10px;opacity:0;pointer-events:none;transition:opacity .2s}
+#toast.on{opacity:1}
+dialog{border:0;border-radius:14px;padding:0;width:min(560px,92vw);box-shadow:0 20px 60px #0004}
+dialog::backdrop{background:#0006}.inv{padding:34px}.inv h1{margin:0 0 4px;font-size:22px}.inv .tot{font-size:26px;font-weight:700;text-align:right}
+.pill.Upcoming{background:#e4ecff;color:#2845b8}.pill.Rejected,.pill.Canceled{background:var(--kobg);color:var(--ko)}.tx-row{cursor:pointer}textarea.mono{width:100%;font:12.5px/1.5 ui-monospace,Menlo,monospace;padding:10px 12px;border-radius:8px;border:1px solid var(--line);min-height:150px}.quote{background:var(--bg);border-radius:10px;padding:12px 14px;margin:12px 0;font-size:13.5px}.quote div{display:flex;justify-content:space-between;padding:2px 0}.fbar{display:flex;gap:10px;margin-bottom:14px}.fbar input,.fbar select{width:auto;flex:1}.fbar select{flex:0 0 170px}
+.stp{display:grid;grid-template-columns:34px 1fr;gap:0 12px}.stp .dot{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:12px;background:var(--gray);color:var(--mute);position:relative}
+.stp .dot.done{background:var(--ok);color:#fff}.stp .dot.current{background:var(--accent);color:#fff;box-shadow:0 0 0 4px #5b3df522}
+.stp .ln{width:2px;background:var(--line);margin:2px auto;min-height:14px}.stp .bd{padding-bottom:18px}.stp .bd b{font-size:14.5px}.stp .bd.todo{opacity:.55}
+.chip{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px;background:var(--gray);color:#4a4a45;margin-left:6px}
+.prog{height:8px;border-radius:99px;background:var(--gray);overflow:hidden;margin:8px 0 4px}.prog i{display:block;height:100%;background:var(--ok)}
+.simbox{border:1px dashed #b9b9b0;background:#fafaf6}.cols2{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:16px;align-items:start}@media(max-width:900px){.cols2{grid-template-columns:1fr}}
+.pill.Completed{background:var(--okbg);color:var(--ok)}.pill.WaitingForAdditionalInformation{background:var(--kobg);color:var(--ko)}.pill.PendingInternalReview,.pill.WaitingForNotaryShareDepositCertificate,.pill.WaitingForRegisterExtract,.pill.WaitingForNotaryTransfer,.pill.WaitingForInitialRequirements{background:var(--warnbg);color:var(--warn)}
+.pill.Partial{background:#e4ecff;color:#2845b8}.pill.Cancelled{background:var(--gray);color:var(--mute);text-decoration:line-through}.pill.Credit{background:#efe6ff;color:#5b3df5}
+.lines{width:100%;margin:6px 0}.lines td{padding:5px 4px;border:0}.lines input,.lines select{padding:8px}.lines .x{border:0;background:none;color:var(--mute);cursor:pointer;font-size:18px}
+.tot{margin-left:auto;width:300px;font-size:13.5px}.tot div{display:flex;justify-content:space-between;padding:3px 0}.tot .ttc{font-size:18px;font-weight:700;border-top:1px solid var(--ink);margin-top:6px;padding-top:8px}
+.acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}.sub{font-size:12px;color:var(--mute)}textarea{width:100%;font:inherit;padding:10px 12px;border-radius:8px;border:1px solid var(--line);min-height:60px}
+dialog.wide{width:min(860px,95vw)}.warn{background:var(--warnbg);color:var(--warn);padding:9px 12px;border-radius:8px;font-size:12.5px;margin-bottom:12px}
+.row{cursor:pointer}.stacked{display:grid;gap:10px}.pdfwrap object{border:1px solid var(--line);border-radius:8px}
+aside .nb{margin-left:auto;background:var(--accent);color:#fff;font-size:11px;font-weight:700;border-radius:99px;padding:1px 7px}
+.tl{list-style:none;padding:0;margin:8px 0;font-size:13px}.tl li{padding:4px 0 4px 16px;position:relative;color:var(--mute)}.tl li:before{content:"";position:absolute;left:0;top:11px;width:7px;height:7px;border-radius:50%;background:var(--ink)}
+.kv{display:grid;grid-template-columns:150px 1fr;gap:6px 12px;font-size:13.5px;margin:12px 0}.kv span:nth-child(odd){color:var(--mute)}
+main.wide{max-width:1480px}
+.ed-top{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:12px;background:var(--bg);padding:14px 0;margin:-14px 0 10px;border-bottom:1px solid var(--line)}
+.ed-top h2{font-size:20px}.ed-top .grow{flex:1}.ed-ttc{font-weight:700;font-size:15px;margin-right:6px}
+.ed-grid{display:grid;grid-template-columns:minmax(0,560px) minmax(0,1fr);gap:28px;align-items:start}
+.ed-form .card{padding:20px 22px}.ed-form h3{display:flex;align-items:center;gap:10px;margin:0 0 16px;font-size:15px}
+.step{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--ink);color:#fff;font-size:12px;font-weight:700}
+.ed-form .f{margin-bottom:12px}.ed-form .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ccard{display:flex;gap:12px;align-items:flex-start;margin-top:12px;padding:12px;background:var(--bg);border-radius:10px;font-size:13px}
+.ccard .av{margin:0;flex:none}.ccard .ok{color:var(--ok)}.ccard .ko{color:var(--ko)}
+.seg{display:flex;background:var(--gray);border-radius:10px;padding:3px;gap:2px}.seg button{flex:1;border:0;background:none;padding:8px 6px;border-radius:8px;font:inherit;font-weight:500;color:var(--mute);cursor:pointer}
+.seg button.on{background:#fff;color:#0d0d0d;box-shadow:0 1px 3px #0002}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.chip{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:99px;padding:4px 11px;font:inherit;font-size:12px;cursor:pointer}
+.chip:hover,.chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.ln{border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px;background:var(--card);transition:border-color .15s}.ln:focus-within{border-color:var(--ink)}
+.ln-top{display:flex;gap:8px}.ln-top input{border:0;padding:6px 4px;font-weight:500;background:transparent}.ln-top input:focus{outline:none}
+.ln-bot{display:grid;grid-template-columns:70px 1fr 90px 1fr;gap:10px;align-items:end;margin-top:8px}
+.ln-bot label{font-size:11.5px;font-weight:500;color:var(--mute);margin:0}.ln-bot input,.ln-bot select{padding:7px 9px;margin-top:3px}
+.ln .lt{text-align:right;font-size:11.5px;color:var(--mute)}.ln .lt b{display:block;font-size:14px;color:var(--ink);padding-top:4px}
+.ln .ib{border:0;background:none;color:var(--mute);cursor:pointer;font-size:16px;padding:2px 6px;border-radius:6px}.ln .ib:hover{background:var(--gray);color:var(--ink)}
+.chk{list-style:none;margin:0;padding:0;font-size:13px}.chk li{padding:4px 0;display:flex;gap:8px}.chk .ok{color:var(--ok)}.chk .ko{color:var(--warn)}
+.ed-prev{position:sticky;top:72px}.paperbar{display:flex;justify-content:space-between;color:var(--mute);font-size:12.5px;margin-bottom:10px}
+.paperwrap{background:#e4e4df;border-radius:14px;padding:18px;overflow:hidden}
+.paperbox{position:relative;width:100%;box-shadow:0 8px 30px #0003;background:#fff;overflow:hidden}
+.paper{position:absolute;left:0;top:0;width:595px;height:842px;transform-origin:top left;background:#fff;color:#0d0d0d;font:10px/1.4 "Inter",system-ui,sans-serif;padding:40px}
+.paper .wm{position:absolute;inset:0;display:grid;place-items:center;font-size:90px;font-weight:800;color:#0d0d0d0d;transform:rotate(-28deg);pointer-events:none}
+.paper h4{margin:0;font-size:15px}.paper .m{color:#76766f}.paper .r{text-align:right}.paper table{width:100%;border-collapse:collapse}
+.paper th{font-size:7.5px;color:#76766f;text-align:left;padding:0 0 6px;border-bottom:1px solid var(--acc,#0d0d0d)}.paper th.r,.paper td.r{text-align:right}
+.paper td{padding:6px 0;border-bottom:1px solid #e3e3de;border-top:0}.paper tbody tr:hover{background:none}
+.paper .cl{background:#f4f4f2;border-radius:5px;padding:9px 11px;width:215px;margin:16px 0}
+.paper .tt{margin:12px 0 0 auto;width:240px}.paper .tt div{display:flex;justify-content:space-between;padding:2px 0}.paper .tt .g{color:var(--acc,#0d0d0d);border-top:1px solid var(--acc,#0d0d0d);margin-top:4px;padding-top:5px;font-weight:700;font-size:11.5px}
+.paper .ft{position:absolute;left:40px;right:40px;bottom:22px;font-size:6.5px;color:#76766f;text-align:center;border-top:1px solid #e3e3de;padding-top:6px}
+@media(max-width:1100px){.ed-grid{grid-template-columns:1fr}.ed-prev{position:static}}
+.bgrid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:28px;align-items:start}.bgrid .f{margin-bottom:16px}.bprev{position:sticky;top:16px}
+.tpls{display:flex;gap:10px}.tpl{flex:1;border:2px solid var(--line);border-radius:12px;padding:10px 6px 8px;background:var(--card);cursor:pointer;text-align:center;font:inherit;font-size:12px;font-weight:500;color:var(--ink)}
+.tpl.on{border-color:var(--ink)}.tpl svg{width:48px;height:64px;display:block;margin:0 auto 6px}
+@media(max-width:900px){.bgrid{grid-template-columns:1fr}}
+.sw{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.sw button{width:30px;height:30px;border-radius:50%;border:2px solid transparent;cursor:pointer;box-shadow:0 0 0 1px var(--line)}.sw button.on{border-color:var(--card);box-shadow:0 0 0 2px var(--ink)}
+.logo-up{display:flex;gap:16px;align-items:center}.logo-box{width:200px;height:70px;border:1px dashed var(--line);border-radius:10px;display:grid;place-items:center;background:var(--bg);overflow:hidden}.logo-box img{max-width:100%;max-height:100%}
+.cap-sh{display:grid;grid-template-columns:1fr 1.2fr .6fr 1.4fr auto;gap:8px;margin-bottom:8px}
+.cap-bar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:-8px 0 14px}
+.cap-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,460px);gap:16px;align-items:start}.cap-grid.solo{grid-template-columns:minmax(0,1fr)}
+.cap-steps{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin-top:16px}
+.cs{display:grid;gap:4px;align-content:start;padding:10px;border-radius:10px;background:var(--bg);font-size:12.5px}.cs .sub{font-size:11.5px}
+.cs-dot{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:var(--gray);color:var(--mute);font-weight:700;font-size:11px}
+.cs.done .cs-dot{background:var(--ok);color:#fff}.cs.current{background:#efeaff;box-shadow:inset 0 0 0 1px var(--accent)}.cs.current .cs-dot{background:var(--accent);color:#fff}
+.cs.todo{opacity:.6}.cs.goal{box-shadow:inset 0 -3px 0 var(--ok)}.cs.current.goal{box-shadow:inset 0 0 0 1px var(--accent),inset 0 -3px 0 var(--ok)}
+.warn.bad{background:var(--kobg);color:var(--ko)}.warn.good{background:var(--okbg);color:var(--ok)}.card .warn{margin:14px 0 0}
+.int{border:1px dashed #9b8cf0;background:#faf9ff}
+.mono{font-family:ui-monospace,Menlo,monospace;font-size:12px}
+.tag{font-size:11px;font-weight:600;padding:2px 7px;border-radius:99px;background:var(--ink);color:#fff;margin-left:6px}
+.pill.t-ok{background:var(--okbg);color:var(--ok)}.pill.t-warn{background:var(--warnbg);color:var(--warn)}.pill.t-ko{background:var(--kobg);color:var(--ko)}.pill.t-info{background:#e4ecff;color:#2845b8}.pill.t-mute{background:var(--gray);color:var(--mute)}
+.warn a.btn{text-decoration:none;display:inline-block}#ml-root td:nth-child(2){min-width:240px}#ml-root td .mono{overflow-wrap:anywhere}
+.lnk{border:0;background:none;color:var(--accent);font:inherit;font-weight:600;cursor:pointer;padding:0}
+.actor{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--mute);margin:16px 0 2px}
+.acts-list .a{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:8px 0;border-top:1px solid var(--line);font-size:13px}
+.a-r{display:flex;gap:6px;align-items:center;flex:none}.acts-list .a.wide{flex-wrap:wrap}.acts-list .a.wide .a-r{flex:1 1 100%}.rc{flex:1;min-width:0;padding:5px 8px;font-size:11.5px}
+.rf blockquote{margin:6px 0 2px;padding:6px 10px;border-left:3px solid var(--warn);background:var(--warnbg);color:var(--ink);font-size:12.5px;border-radius:0 6px 6px 0}.rf li.cur{background:#fff}.rs{width:150px;padding:5px 6px;font-size:11.5px}
+.lg{list-style:none;padding:0;margin:0;font-size:12.5px;max-height:420px;overflow:auto}.lg li{padding:7px 0;border-top:1px solid var(--line)}
+.lg summary{cursor:pointer}.lg pre,.int pre{white-space:pre-wrap;word-break:break-word;background:var(--bg);padding:8px;border-radius:6px;font-size:11.5px;margin:6px 0 0;max-height:260px;overflow:auto}
+.k{font:600 10.5px ui-monospace,Menlo,monospace;padding:1px 6px;border-radius:4px;margin-right:6px}
+.k.api{background:#e4ecff;color:#2845b8}.k.webhook{background:#efe6ff;color:#5b3df5}.k.rule{background:var(--okbg);color:var(--ok)}.k.skip{background:var(--gray);color:var(--mute)}.k.zendesk{background:var(--warnbg);color:var(--warn)}
+tr.grp td{background:var(--bg);font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--mute);padding:7px 8px}
+table.ids td{padding:7px 6px;font-size:12px}
+@media(max-width:1100px){.cap-grid{grid-template-columns:1fr}.cap-steps{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:700px){.cap-steps{grid-template-columns:repeat(2,minmax(0,1fr))}.cap-sh{grid-template-columns:1fr 1fr}}
+.sm-tools{display:grid;gap:12px}.sm-row{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
+.sm-ctl{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.sm-ctl select{width:auto}
+.sm-grid{display:grid;grid-template-columns:minmax(0,320px) minmax(0,1fr);gap:16px;align-items:start}
+.sm-it{display:grid;gap:3px;justify-items:start;text-align:left;width:100%;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:10px 12px;margin-top:8px;font:inherit;cursor:pointer;color:var(--ink)}
+.sm-it.on{border-color:var(--ink)}.sm-it:hover{background:var(--bg)}
+.sm-orig{white-space:pre-wrap;word-break:break-word;background:var(--bg);padding:10px;border-radius:8px;font-size:12.5px;margin:8px 0 0;max-height:300px;overflow:auto}
+@media(max-width:900px){.sm-grid{grid-template-columns:1fr}}
+@media print{aside,main>*,#toast{display:none}dialog{box-shadow:none}}
+@media(max-width:800px){body{flex-direction:column}aside{width:auto;height:auto;position:static;flex-direction:row;flex-wrap:wrap}.org,.badge,.sep{display:none}
+ main{padding:18px}.hero{grid-template-columns:1fr}form{grid-template-columns:1fr}}
+</style></head><body>
+<aside>
+ <div class="logo"><i></i>Nova Pro</div>
+ <div class="org">Dépôt de capital<small>Espace séparé</small></div>
+ <a data-t="capital"><svg viewBox="0 0 24 24"><path d="M3 20h18M5 20V10l7-5 7 5v10M9 20v-6h6v6"/></svg>Dépôt de capital</a>
+ <a data-t="mailing"><svg viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg>Mailing<span class="nb" id="nb-ml" style="display:none"></span></a>
+ <div class="sep"></div>
+ <a href="/client" target="_blank" style="color:var(--sideink)"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg>Vue client ↗</a>
+ <a href="/dashboard" style="color:var(--sideink)"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Refus de documents</a>
+ <a href="/agent" style="color:var(--sideink)"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H4zM8 20h8M12 16v4"/></svg>Console formaliste</a>
+ <a id="main-link" href="#" style="color:var(--sideink)"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Compte pro</a>
+ <div class="badge" id="mode"></div>
+</aside>
+<main>
+ <section class="sec on" id="capital"><header class="top"><h2>Dépôt de capital</h2><span class="pill">Maquette · données fictives</span></header><div id="cap-root"></div></section>
+ <section class="sec" id="mailing"><header class="top"><h2>Mailing</h2><span class="pill">À construire ensemble</span></header><div id="ml-root"></div></section>
+</main>
+<dialog id="cap-doc-dlg"><div style="padding:28px"><div id="cd-head"></div><div id="cd-checks" style="margin:12px 0"></div><div id="cd-seen" class="stacked" style="display:grid;gap:10px"></div>
+ <div style="margin:12px 0"><label>Fichier (pdf, png ou jpg, 5 Mo max)</label><input type="file" id="cd-file" accept=".pdf,.png,.jpg,.jpeg"></div><div id="cd-warn"></div>
+ <div class="acts"><button class="btn ghost" onclick="this.closest('dialog').close()">Annuler</button> <button class="btn" id="cd-send" disabled>Envoyer</button></div></div></dialog>
+<div id="toast"></div>
+<script>
+const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s);
+const eur=v=>Number(v).toLocaleString('fr-FR',{style:'currency',currency:'EUR'});
+const fr=d=>new Date(d).toLocaleDateString('fr-FR');
+const lab={Draft:'Brouillon',Sent:'Envoyée',Late:'En retard',Paid:'Payée',Booked:'Validée',Upcoming:'À venir',Rejected:'Rejetée',Canceled:'Annulée',Pending:'En cours',ConsentPending:'À valider',Enabled:'Active',Opened:'Ouvert'};
+const api=(p,o)=>fetch('/api/'+p,o&&{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(o)}).then(r=>r.json());
+const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2600)};
+const go=t=>{$('main').classList.remove('wide');$$('aside a,.sec').forEach(x=>x.classList.remove('on'));$(`aside a[data-t=${t}]`).classList.add('on');$('#'+t).classList.add('on')};
+$$('aside a[data-t]').forEach(a=>a.onclick=()=>go(a.dataset.t));$$('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
+const pill=s=>`<span class="pill ${s}">${lab[s]||s}</span>`;
+const ini=s=>s.split(/[\s→]+/).slice(0,2).map(w=>w[0]).join('').toUpperCase();
+const money=a=>Number(a.value).toLocaleString('fr-FR',{style:'currency',currency:a.currency});
+const PROD={SEPACreditTransfer:'Virement SEPA',SEPADirectDebit:'Prélèvement SEPA',InternationalCreditTransfer:'Virement international',Card:'Carte',Fees:'Frais',InternalCreditTransfer:'Virement interne'};
+const M=c=>eur(c/100);
+const err=e=>toast(e.error||'Erreur');
+const call=async(p,o)=>{const r=await api(p,o||{});if(r.error){err(r);throw r}return r};
+const esc=v=>String(v??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+/* ----- dépôt de capital : marque blanche (le client ne voit que Nova Pro) + vue interne ----- */
+const capE=x=>(x/100).toLocaleString('fr-FR',{style:'currency',currency:'EUR'});
+const capEl=$('#cap-root');
+let capV=null,capInternal=true,capSel=null,capList=[];
+try{capInternal=localStorage.getItem('capInternal')!=='0'}catch{}
+const T_CASE={Completed:'t-ok',WaitingForRegisterExtract:'t-ok',Canceled:'t-ko',WaitingForAdditionalInformation:'t-ko'};
+const T_SH={CapitalTransferred:'t-ok',CapitalFundsWiredToNotary:'t-ok',WaitingForTransfer:'t-info',CapitalDepositCanceled:'t-mute'};
+const T_DOC={Validated:'t-ok',Uploaded:'t-info',Pending:'t-mute',Refused:'t-ko'};
+const tp=(cls,txt)=>`<span class="pill ${cls||'t-warn'}">${esc(txt)}</span>`;
+const capRow=(n='',e='',a='',ad='')=>`<div class="cap-sh"><input placeholder="Nom de l'associé" value="${esc(n)}" data-f="name"><input placeholder="Email" value="${esc(e)}" data-f="email"><input type="number" min="1" step="1" placeholder="Apport (€)" value="${a}" data-f="amount"><input placeholder="Adresse (comme sur le justificatif)" value="${esc(ad)}" data-f="address"><button type="button" class="btn ghost sm" data-rm aria-label="Retirer">×</button></div>`;
+function capForm(){return `
+ <div class="card"><h3>Déposer le capital de votre société</h3>
+  <div class="sub" style="margin-bottom:14px">Chaque associé vérifie son identité et vire son apport sur un compte de dépôt à son nom. Le notaire délivre l’attestation de dépôt des fonds, puis libère le capital sur votre compte pro dès l’immatriculation.</div>
+  <form id="f-cap" style="display:block"><div style="display:grid;gap:12px;grid-template-columns:2fr 1fr 2fr"><div><label for="cap-co">Nom de la société</label><input id="cap-co" name="companyName" value="Studio Nova SAS" required></div>
+  <div><label for="cap-lf">Forme juridique</label><select id="cap-lf" name="legalForm"><option>SAS</option><option>SASU</option><option>SARL</option><option>EURL</option></select></div>
+  <div><label for="cap-ad">Adresse du siège</label><input id="cap-ad" name="address" value="12 rue de la Paix, 75002 Paris"></div></div>
+  <div style="margin-top:12px;max-width:360px"><label for="cap-src">Statuts</label><select id="cap-src" name="articlesSource"><option value="generated">Générés par Nova Pro (à signer)</option><option value="client">Fournis par le client (contrôle formaliste)</option></select></div>
+  <h3 style="margin:18px 0 8px">Associés et apports</h3><div class="sub" style="margin-bottom:8px">Le premier associé est le fondateur : il pilote le dossier.</div>
+  <div id="cap-shs">${capRow('Camille Durand','camille@studio-durand.fr',3000,'8 rue des Lilas, 69003 Lyon')}${capRow('Léo Martin','leo@example.fr',2000,'4 avenue Foch, 75116 Paris')}</div>
+  <button type="button" class="btn ghost sm" id="cap-add">+ Ajouter un associé</button> <span class="sub" id="cap-total" style="margin-left:10px"></span>
+  <div style="margin-top:16px"><button class="btn">Créer le dossier</button></div></form></div>`}
+// Libellé client : une demande libre du partenaire pas encore relayée reste invisible pour le client
+const capLabel=c=>c.status=='WaitingForAdditionalInformation'&&c.info_source=='email'&&!c.info_relayed?'Dossier en vérification':c.label;
+function capClient(v){const c=v.case,pct=c.total_cents?Math.round(v.funded/c.total_cents*100):0,has=id=>v.actions.some(a=>a.id==id);
+ let banner='';
+ if(c.status=='WaitingForAdditionalInformation'&&c.info_source=='email'&&c.info_relayed)banner=`<div class="warn bad"><b>Un complément est nécessaire</b><br>${esc(c.info_request)}${has('answer')?'<div style="margin-top:8px"><button class="btn sm" data-act="answer">J’ai envoyé le complément</button></div>':''}</div>`;
+ else if(c.status=='WaitingForAdditionalInformation')banner=`<div class="warn bad"><b>Un document est à remplacer</b><br>${esc(c.info_request)}. Voir la rubrique Documents.</div>`;
+ if(c.certificate_at&&c.status!='Canceled')banner+=`<div class="warn good"><b>Votre attestation de dépôt des fonds est disponible.</b> ${c.status=='WaitingForRegisterExtract'?'Joignez-la à votre demande d’immatriculation, puis déposez l’extrait Kbis ci-dessous.':''}<div style="margin-top:8px"><a class="btn sm" target="_blank" href="/api/capital/${c.id}/certificate.pdf">Télécharger l’attestation</a></div></div>`;
+ if(c.status=='Completed')banner+=`<div class="warn good">Le capital de ${capE(c.total_cents)} est arrivé sur votre compte pro (voir Transactions).</div>`;
+ if(c.status=='Canceled')banner=`<div class="warn bad">${c.cancel_sensitive?'Ce dossier ne peut pas aboutir. Un conseiller va vous contacter.':`Dossier annulé : ${esc(c.cancel_label||c.cancel_note||'')}.`}</div>`;
+ const steps=`<div class="cap-steps">${v.steps.map((s,i)=>`<div class="cs ${s.state}${s.goal?' goal':''}"><span class="cs-dot">${s.state=='done'?'✓':i+1}</span><b>${esc(s.title)}</b><span class="sub">${esc(s.desc)}</span></div>`).join('')}</div>`;
+ const sh=v.shareholders.map(s=>`<tr><td><span class="av">${ini(s.name)}</span><b>${esc(s.name)}</b>${s.is_admin?'<span class="tag">Fondateur</span>':''}<div class="sub" style="margin-left:40px">${esc(s.email)}</div></td>
+  <td class="r"><b>${capE(s.amount_cents)}</b></td><td>${tp(T_SH[s.status],s.label)}</td>
+  <td>${s.iban?`<span class="mono">${esc(s.iban)}</span> <button class="lnk" data-copy="${esc(s.iban)}">Copier</button>`:'<span class="sub">Disponible après la vérification d’identité</span>'}${s.attempts&&s.status=='WaitingForTransfer'?`<div class="sub" style="color:var(--ko)">${s.attempts} virement refusé · ${2-s.attempts} tentative restante</div>`:''}</td></tr>`).join('');
+ const groups=[[c.company_name,v.documents.filter(d=>!d.shareholder_id&&!d.notary)],...v.shareholders.map(s=>[s.name,v.documents.filter(d=>d.shareholder_id==s.id)])];
+ const docs=groups.map(([g,ds])=>`<tr class="grp"><td colspan="2">${esc(g)}</td></tr>`+ds.map(d=>`<tr><td>${esc(d.label)}${d.kyc?'<div class="sub">Recueillie lors de la vérification d’identité</div>':''}${d.explanation?`<div class="warn bad" style="margin:6px 0 0"><b>Refusé : ${esc(d.explanation.title)}</b><br>${esc(d.explanation.fix)}</div>`:''}</td>
+  <td class="r">${tp(T_DOC[d.status],d.status_label)}${d.uploadable?` <button class="btn sm" data-doc="${d.id}">${d.status=='Refused'?'Remplacer':'Déposer'}</button>`:''}</td></tr>`).join('')).join('');
+ return `<div class="card"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap"><div><div class="sub">Dossier ${esc(c.ref)}</div><h3 style="margin:2px 0 0;font-size:18px">${esc(c.company_name)} <span class="sub" style="font-size:13px">${esc(c.legal_form||'')}</span></h3><div class="sub">${esc(c.address||'')}</div></div>${tp(T_CASE[c.status],capLabel(c))}</div>
+  <div class="grid" style="margin:14px 0 0"><div><div class="lbl">Capital</div><div class="big" style="font-size:24px">${capE(c.total_cents)}</div></div><div><div class="lbl">Apports reçus</div><div class="big" style="font-size:24px">${capE(v.funded)}</div><div class="prog"><i style="width:${pct}%"></i></div></div></div>
+  ${banner}${steps}
+  ${has('cancel')?'<div style="margin-top:12px"><button class="btn ghost sm" data-act="cancel">Annuler le dossier</button> <span class="sub">Possible tant qu’aucun apport n’est versé.</span></div>':''}</div>
+ <div class="card"><h3>Associés</h3><div style="overflow:auto"><table><thead><tr><th>Associé</th><th class="r">Apport</th><th>Statut</th><th>Compte de dépôt</th></tr></thead><tbody>${sh}</tbody></table></div></div>
+ <div class="card"><h3>Documents</h3><table><tbody>${docs}</tbody></table></div>
+ <div class="card"><h3>Historique</h3><ul class="lg">${v.timeline.map(e=>`<li><span class="sub">${new Date(e.created_at+'Z').toLocaleString('fr-FR')}</span><br>${esc(e.text)}</li>`).join('')}</ul></div>
+ `}
+const KIND={api:'API',webhook:'Webhook',rule:'Règle',skip:'Ignoré',zendesk:'Zendesk'};
+function capInt(v){const c=v.case,next=v.actions.find(a=>a.happy),byActor={};
+ v.actions.forEach(a=>(byActor[a.actorLabel]=byActor[a.actorLabel]||[]).push(a));
+ const reasonSel=a=>a.needsReason?`<select class="rs" data-reason-for="${a.id}" aria-label="Motif">${Object.entries(a.needsReason=='cancel'?v.cancelReasons:v.reasons).map(([k,t])=>`<option value="${k}">${esc(t)}</option>`).join('')}</select>`:'';
+ const commentIn=a=>a.needsReason=='doc'?`<input class="rc" data-comment-for="${a.id}" aria-label="Commentaire de l’analyste" placeholder="Commentaire de l’analyste (vide = type, « - » = aucun)">`:'';
+ const acts=Object.entries(byActor).map(([actor,l])=>`<div class="actor">${esc(actor)}</div>`+l.map(a=>`<div class="a${a.needsReason=='doc'?' wide':''}"><span>${esc(a.label)}</span><span class="a-r">${commentIn(a)}${reasonSel(a)}<button class="btn ghost sm" data-act="${a.id}">Passer</button></span></div>`).join('')).join('');
+ const ids=[['Dossier','capitalDepositCase',c.status,c.swan_id],...v.shareholders.flatMap(s=>[[s.name,'shareholder',s.status,s.swan_id],...(s.account_id?[[s.name,'account (dépôt)','',s.account_id]]:[])]),
+  ...v.documents.map(d=>[`${d.label}${d.shareholder_id?' · '+d.owner:''}`,d.kyc?'supportingDocument':'capitalDepositDocument',d.status,d.swan_id])];
+ return `<div class="card int"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><h3 style="margin:0">Vue interne</h3><span class="sub">Non visible du client</span></div>
+  <div class="kv" style="grid-template-columns:130px 1fr"><span>Réf. client</span><span><b>${esc(c.ref)}</b></span><span>ID dépôt Swan</span><span><span class="mono">${esc(c.swan_id)}</span> <button class="lnk" data-copy="${esc(c.swan_id)}">Copier</button></span><span>Statut Swan</span><span><span class="mono">${esc(c.status)}</span>${c.cancel_reason?` · <span class="mono">${esc(c.cancel_reason)}</span>`:''}</span></div>
+  ${next?`<button class="btn" data-act="next" style="width:100%">Passer l’étape suivante</button><div class="sub" style="margin-top:6px">${esc(next.actorLabel)} : ${esc(next.label)}</div>`:'<div class="sub">Dossier terminé : plus aucune action.</div>'}
+  ${v.partnerEmails?`<div class="warn" style="margin-top:12px"><b>${v.partnerEmails} email${v.partnerEmails>1?'s':''} du partenaire à valider</b> pour ce dossier. <button class="lnk" data-go-mailing>Ouvrir Mailing › Emails partenaire</button></div>`:''}
+  ${v.docRefusals.length?`<div class="actor">Refus de documents · commentaires (${v.docRefusals.length})</div><ul class="lg rf">${v.docRefusals.map(r=>`<li class="${r.current?'cur':''}"><div><b>${esc(r.label)}</b> · ${esc(r.owner||'')} <span class="sub">${esc(r.refused_by||'')} · ${new Date(r.created_at+'Z').toLocaleString('fr-FR',{dateStyle:'short',timeStyle:'short'})}</span>${r.current?' <span class="pill t-ko">en cours</span>':''}</div>
+   <div class="sub"><span class="mono">${esc(r.reason_code||'')}</span> → consigne client : ${esc(r.code_title)}</div>
+   ${r.reason?`<blockquote>${esc(r.reason)}</blockquote>${r.partner_mentioned?'<div class="sub" style="color:var(--ko)">Mentionne le partenaire : ne pas transmettre tel quel au client.</div>':''}`:'<div class="sub"><i>Aucun commentaire de l’analyste (champ reason vide).</i></div>'}</li>`).join('')}</ul>`:''}
+  <div class="acts-list">${acts}</div></div>
+ <div class="card"><h3>Journal API et webhooks</h3><ul class="lg">${v.log.map(l=>`<li>${l.detail?`<details><summary><span class="k ${l.kind}">${KIND[l.kind]||l.kind}</span>${esc(l.title)}</summary><pre>${esc(l.detail)}</pre></details>`:`<span class="k ${l.kind}">${KIND[l.kind]||l.kind}</span>${esc(l.title)}`}</li>`).join('')}</ul></div>
+ <div class="card"><h3>Messages envoyés (${v.messages.length})</h3><ul class="lg">${v.messages.map(m=>`<li><details><summary><span class="k rule">${esc(m.rule)}</span>${esc(m.to_name)} · ${esc(m.subject)}</summary><pre>${esc(m.body)}</pre></details></li>`).join('')||'<li class="sub">Aucun message.</li>'}</ul><button class="lnk" data-go-mailing>Ouvrir le menu Mailing</button></div>
+ <div class="card"><h3>Identifiants Swan (fictifs)</h3><div style="overflow:auto"><table class="ids"><tbody>${ids.map(([n,t,s,id])=>`<tr><td>${esc(n)}<div class="sub mono">${t}</div></td><td><span class="mono">${esc(s)}</span></td><td><span class="mono" title="${esc(id)}">${esc(id.slice(0,8))}…</span></td></tr>`).join('')}</tbody></table></div></div>`}
+// Tous les dossiers : ouvrir, annuler, supprimer (mode test)
+function capCases(){const open=capList.filter(x=>!['Completed','Canceled'].includes(x.status)).length;
+ return `<div class="card" style="padding:16px 18px"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:${capList.length?10:0}px"><h3 style="margin:0">Dossiers (${capList.length}) <span class="sub" style="font-weight:400">· ${open} en cours</span></h3><button class="btn sm" id="cap-new">+ Nouveau dossier</button></div>
+  ${capList.length?`<div style="overflow:auto;max-height:260px"><table><tbody>${capList.map(x=>{const cur=x.id==capV?.case?.id,closed=['Completed','Canceled'].includes(x.status);
+   return `<tr style="${cur?'background:#f4f1ff':''}"><td><b>${esc(x.company_name)}</b><div class="sub mono">${esc(x.ref)}</div></td><td><span class="pill ${x.status=='Completed'?'t-ok':x.status=='Canceled'?'t-mute':'t-info'}">${esc(x.label)}</span></td>
+   <td class="r">${cur?'<span class="sub">Affiché</span>':`<button class="btn ghost sm" data-open="${x.id}">Ouvrir</button>`}${closed?'':` <button class="btn ghost sm" data-withdraw="${x.id}">Annuler</button>`} <button class="btn ghost sm" data-del="${x.id}" aria-label="Supprimer ${esc(x.ref)}" style="color:var(--ko)">Supprimer</button></td></tr>`}).join('')}</tbody></table></div>`:''}</div>`}
+function capRender(v){capV=v;capSel=v.case?.id;const wide=capInternal;$('main').classList.toggle('wide',wide);
+ capEl.innerHTML=capCases()+`<div class="cap-bar"><span class="sub">${capInternal?'Vue client à gauche, vue interne à droite.':'Vue client (ce que voit le fondateur).'}</span><button class="btn ghost sm" id="cap-int">${capInternal?'Masquer la vue interne':'Afficher la vue interne'}</button></div>
+  <div class="cap-grid ${capInternal?'':'solo'}"><div>${capClient(v)}</div>${capInternal?`<div>${capInt(v)}</div>`:''}</div>`}
+async function loadCapital(forceForm){capList=await api('capital/queue');if(capSel&&!capList.some(x=>x.id==capSel))capSel=null;
+ const v=await api('capital'+(capSel?'?id='+capSel:''));
+ if(!v.case||forceForm===true){capV=forceForm===true?null:v;$('main').classList.remove('wide');capEl.innerHTML=capCases()+capForm(null);capTotal();return}
+ capRender(v)}
+function capTotal(){const t=[...capEl.querySelectorAll('[data-f=amount]')].reduce((a,i)=>a+(Number(i.value)||0),0);const el=$('#cap-total');if(el)el.textContent='Capital total : '+t.toLocaleString('fr-FR',{style:'currency',currency:'EUR'})}
+capEl.addEventListener('input',capTotal);
+capEl.addEventListener('click',async e=>{const b=e.target.closest('button');if(!b)return;
+ if(b.id=='cap-add'){$('#cap-shs').insertAdjacentHTML('beforeend',capRow());return}
+ if(b.dataset.rm!==undefined){b.closest('.cap-sh').remove();capTotal();return}
+ if(b.id=='cap-new'){loadCapital(true);return}
+ if(b.dataset.open){capSel=+b.dataset.open;loadCapital();return}
+ if(b.dataset.withdraw){const x=capList.find(y=>y.id==b.dataset.withdraw);if(!confirm(`Annuler le dossier ${x.ref} (${x.company_name}) ?\nLes associés sont prévenus par email ; les apports déjà versés sont restitués.`))return;
+  b.disabled=true;try{await call(`capital/${x.id}/withdraw`);capSel=x.id;toast('Dossier annulé');loadCapital()}catch{b.disabled=false}return}
+ if(b.dataset.del){const x=capList.find(y=>y.id==b.dataset.del);if(!confirm(`Supprimer définitivement le dossier ${x.ref} (${x.company_name}) ?\nToutes ses données de test seront effacées. Cette action est irréversible.`))return;
+  try{await call(`capital/${x.id}/delete`);if(capSel==x.id)capSel=null;toast(`Dossier ${x.ref} supprimé`);loadCapital()}catch{}return}
+ if(b.id=='cap-int'){capInternal=!capInternal;try{localStorage.setItem('capInternal',capInternal?'1':'0')}catch{}capRender(capV);return}
+ if(b.dataset.copy){try{await navigator.clipboard.writeText(b.dataset.copy);toast('Copié')}catch{toast(b.dataset.copy)}return}
+ if(b.dataset.goMailing!==undefined){go('mailing');loadMailing();return}
+ if(b.dataset.doc){openCapDoc(b.dataset.doc);return}
+ if(b.dataset.act){const action=b.dataset.act,rs=capEl.querySelector(`[data-reason-for="${CSS.escape(action)}"]`),cm=capEl.querySelector(`[data-comment-for="${CSS.escape(action)}"]`);b.disabled=true;
+  try{const r=await call(`capital/${capV.case.id}/act`,{action,reasonCode:rs?.value,message:cm?.value||undefined});const n=r.messages.length-capV.messages.length;capList=await api('capital/queue');capRender(r);
+   toast(n>0?`${n} message${n>1?'s':''} envoyé${n>1?'s':''} (voir Mailing)`:'Action passée');}catch{b.disabled=false}}});
+let capDoc=null,capForce=false;
+function openCapDoc(id){const d=capV.documents.find(x=>x.id==id);capDoc=d;const r=d.rule||{title:d.label,checks:[]};
+ $('#cd-head').innerHTML=`<h3 style="margin:0">${esc(d.label)}</h3><div class="sub">${esc(d.owner)}</div>${d.explanation?`<div class="warn bad" style="margin:10px 0 0"><b>Refus précédent : ${esc(d.explanation.title)}</b><br>${esc(d.explanation.fix)}</div>`:''}`;
+ $('#cd-checks').innerHTML='<b>Avant d’envoyer, vérifiez :</b>'+r.checks.map(c=>`<label style="display:flex;gap:8px;align-items:flex-start;font-weight:400;margin:8px 0 0"><input type="checkbox" class="cd-ck" style="width:auto;margin-top:3px"><span>${esc(c)}</span></label>`).join('');
+ const need=r.declared;$('#cd-seen').innerHTML=need=='address'||need=='companyAddress'?`<div><label for="cd-address">Adresse figurant sur le document</label><input id="cd-address" placeholder="Recopiez l’adresse telle qu’elle apparaît"></div>`:need=='company'?`<div><label for="cd-name">Raison sociale figurant sur le document</label><input id="cd-name" placeholder="Recopiez-la telle qu’elle apparaît"></div>`:'';
+ $('#cd-file').value='';$('#cd-warn').innerHTML='';capForce=false;$('#cd-send').textContent='Envoyer';capCk();$('#cap-doc-dlg').showModal()}
+const capCk=()=>{$('#cd-send').disabled=![...document.querySelectorAll('.cd-ck')].every(x=>x.checked)||!$('#cd-file').files[0]};
+$('#cd-checks').addEventListener('change',capCk);$('#cd-file').addEventListener('change',capCk);
+$('#cd-send').onclick=async()=>{const f=$('#cd-file').files[0];
+ const o=await api(`capital/${capV.case.id}/docs/${capDoc.id}`,{filename:f.name,size:f.size,confirmed:true,force:capForce,seen:{address:$('#cd-address')?.value,name:$('#cd-name')?.value}});
+ if(o.warnings?.length){$('#cd-warn').innerHTML=`<div class="warn bad"><b>Écart détecté avec le dossier</b><br>• ${o.warnings.map(esc).join('<br>• ')}<br><span class="sub">Corrigez le document ou la saisie, ou envoyez quand même (risque de refus).</span></div>`;capForce=true;$('#cd-send').textContent='Envoyer quand même';return}
+ if(o.error){$('#cd-warn').innerHTML=`<div class="warn bad">${esc(o.error)}</div>`;return}
+ $('#cap-doc-dlg').close();capList=await api('capital/queue');capRender(o);toast('Document envoyé (maquette : le fichier n’est pas conservé)')};
+capEl.addEventListener('submit',async e=>{if(e.target.id!='f-cap')return;e.preventDefault();
+ const shareholders=[...capEl.querySelectorAll('.cap-sh')].map(r=>Object.fromEntries([...r.querySelectorAll('[data-f]')].map(i=>[i.dataset.f,i.value])));
+ try{const r=await call('capital',{companyName:e.target.companyName.value,legalForm:e.target.legalForm.value,address:e.target.address.value,articlesSource:e.target.articlesSource.value,shareholders});capSel=r.case.id;capList=await api('capital/queue');capRender(r);toast('Dossier créé : invitations envoyées (voir Mailing)');}catch{}});
+$('aside a[data-t=capital]').addEventListener('click',()=>loadCapital());
+/* ----- mailing : emails partenaire à valider, modèles, envois ----- */
+let mlSent=[],mlTab='partner',mlItems=[],mlSel=null;
+const SM_ST={to_validate:['À valider','t-warn'],unmatched:['Non rattaché','t-ko'],sent:['Envoyé','t-ok'],ignored:['Ignoré','t-mute']};
+async function loadMailing(){const [m,p,th]=await Promise.all([api('mailing'),api('swanmail'),api('threads')]);mlSent=m.sent;mlItems=p.items;
+ const nb=$('#nb-ml');nb.textContent=p.stats.to_validate;nb.style.display=p.stats.to_validate?'':'none';
+ if(mlSel&&!mlItems.some(x=>x.id==mlSel))mlSel=null;if(!mlSel)mlSel=mlItems.find(x=>['to_validate','unmatched'].includes(x.status))?.id||mlItems[0]?.id||null;
+ const tabs=`<div class="tabs" role="tablist">${[['partner',`Emails partenaire${p.stats.to_validate?` (${p.stats.to_validate})`:''}`],['conv',`Conversations${th.items.filter(t=>t.status=='open'&&t.waiting_on=='nous').length?` (${th.items.filter(t=>t.status=='open'&&t.waiting_on=='nous').length})`:''}`],['tpl','Modèles'],['sent','Envoyés']].map(([k,l])=>`<button role="tab" aria-selected="${mlTab==k}" class="${mlTab==k?'on':''}" data-mltab="${k}">${l}</button>`).join('')}</div>`;
+ let body='';
+ if(mlTab=='tpl')body=`<div class="card"><h3>Modèles (${m.templates.length})</h3><div style="overflow:auto"><table><thead><tr><th>Modèle</th><th>Déclencheur</th><th>Destinataires</th><th class="r">Envoyés</th></tr></thead><tbody>
+  ${m.templates.map(t=>`<tr><td><b>${esc(t.desc)}</b><div class="sub mono">${esc(t.rule)}</div></td><td><span class="mono">${esc(t.trigger)}</span></td><td>${esc(t.to)}</td><td class="r"><b>${t.sent}</b></td></tr>`).join('')}</tbody></table></div></div>`;
+ if(mlTab=='conv')body=`<div class="card"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><h3>Conversations Swan / nous / client (${th.items.length})</h3><span class="sub">Gmail ${th.gmail.mode=='live'?'connecté':'simulé'} · ${esc(th.gmail.address)}</span></div><table><tbody>${th.items.map(t=>`<tr><td><b>${esc(t.company_name)}</b> <span class="sub mono">${esc(t.ref)}</span><div class="sub">${esc(t.subject||'')}${t.ticket?' · #'+esc(t.ticket):''}</div></td><td><span class="pill ${t.status=='closed'?'t-ok':t.waiting_on=='nous'?'t-warn':'t-info'}">${esc(t.waiting_label)}</span></td><td class="sub">${t.n} msg</td><td class="r"><a class="btn ghost sm" href="/agent/conversation?id=${t.id}">Ouvrir</a></td></tr>`).join('')||'<tr><td class="sub">Aucune conversation : elles se créent à la réception d’un email du partenaire.</td></tr>'}</tbody></table></div>`;
+ if(mlTab=='sent')body=`<div class="bgrid" style="grid-template-columns:minmax(0,1fr) minmax(0,1.2fr)"><div class="card"><h3>Envoyés (${m.sent.length})</h3><table><tbody>${m.sent.map((x,i)=>`<tr class="row" data-ml="${i}"><td><b>${esc(x.subject)}</b><div class="sub">${esc(x.to_name)} · ${esc(x.to_role)} · ${esc(x.ref||'')} · <span class="mono">${esc(x.rule)}</span></div></td><td class="r sub">${new Date(x.created_at+'Z').toLocaleString('fr-FR',{dateStyle:'short',timeStyle:'short'})}</td></tr>`).join('')||'<tr><td class="sub">Aucun message envoyé pour l’instant.</td></tr>'}</tbody></table></div>
+  <div class="card"><h3 id="ml-subj">Sélectionnez un message</h3><div class="sub" id="ml-meta"></div><pre id="ml-body" style="white-space:pre-wrap;font:inherit;margin-top:14px"></pre></div></div>`;
+ if(mlTab=='partner'){const it=mlItems.find(x=>x.id==mlSel);
+  body=`<div class="card sm-tools"><div class="sm-row"><div><b>Simuler un email du partenaire</b><div class="sub">Comme un email Zendesk reçu sur l’adresse dédiée, pour le dossier en cours.</div></div>
+   <div class="sm-ctl"><select id="sm-kind" aria-label="Type d’email"><option value="siege">Domiciliation à refaire</option><option value="virement">Virement retourné</option><option value="identite">Pièce d’identité expirée</option><option value="activite">Activité et origine des fonds</option></select><button class="btn sm" id="sm-sim">Recevoir</button></div></div>
+   <details><summary class="lnk">Coller un email réellement reçu</summary><div class="stacked" style="margin-top:10px"><input id="sm-from" placeholder="Expéditeur (ex. support@swan.zendesk.com)" aria-label="Expéditeur"><input id="sm-subj" placeholder="Objet" aria-label="Objet"><textarea id="sm-text" placeholder="Corps de l’email, avec l’identifiant du dépôt de capital" aria-label="Corps de l’email" style="min-height:140px"></textarea><div><button class="btn sm" id="sm-paste">Analyser cet email</button></div></div></details></div>
+  <div class="sm-grid"><div class="card sm-list"><h3>Reçus (${mlItems.length})</h3>${mlItems.map(x=>`<button class="sm-it ${x.id==mlSel?'on':''}" data-sm="${x.id}"><span class="pill ${SM_ST[x.status][1]}">${SM_ST[x.status][0]}</span><b>${esc(x.case?x.case.ref+' · '+x.case.company_name:'Dossier inconnu')}</b><span class="sub">${esc(x.category_label)}${x.ticket?' · ticket #'+esc(x.ticket):''} · ${new Date(x.received_at+'Z').toLocaleString('fr-FR',{dateStyle:'short',timeStyle:'short'})}</span></button>`).join('')||'<div class="sub">Aucun email reçu.</div>'}</div>
+   <div>${it?smDetail(it):'<div class="card sub">Sélectionnez un email.</div>'}</div></div>`}
+ $('#ml-root').innerHTML=tabs+body}
+function smDetail(x){const done=['sent','ignored'].includes(x.status);
+ const chips=[['Dossier',x.case?`${x.case.ref} · ${x.case.company_name}`:'—'],['ID dépôt Swan',x.swan_case_id||'non trouvé'],['Ticket',x.ticket?'#'+x.ticket:'—'],['Catégorie',x.category_label],['Expéditeur',x.from_email||'—']];
+ return `<div class="card"><div style="display:flex;justify-content:space-between;gap:10px;align-items:baseline"><h3 style="margin:0">${esc(x.subject||'(sans objet)')}</h3><span class="pill ${SM_ST[x.status][1]}">${SM_ST[x.status][0]}</span></div>
+  <div class="kv" style="grid-template-columns:120px 1fr">${chips.map(([k,v])=>`<span>${k}</span><span class="${k=='ID dépôt Swan'?'mono':''}">${esc(v)}</span>`).join('')}</div>
+  ${x.thread_id?`<div style="margin:8px 0"><a class="btn ghost sm" href="/agent/conversation?id=${x.thread_id}">Ouvrir la conversation Swan / nous / client</a></div>`:''}<details ${done?'':'open'}><summary class="lnk">Email d’origine (interne)</summary><pre class="sm-orig">${esc(x.body)}</pre></details></div>
+ ${x.warnings.length?`<div class="warn bad" style="margin:0 0 16px"><b>À vérifier avant l’envoi</b><br>• ${x.warnings.map(esc).join('<br>• ')}</div>`:''}
+ ${x.status=='unmatched'?`<div class="card"><h3>Rattacher à un dossier</h3><div class="sub" style="margin-bottom:10px">Aucun dossier trouvé à partir de l’identifiant. Choisissez-le pour générer le brouillon.</div><div class="sm-ctl"><select id="sm-case" aria-label="Dossier">${(capV?.history||[]).map(h=>`<option value="${h.id}">${esc(h.ref)} · ${esc(h.company_name)}</option>`).join('')}</select><button class="btn sm" data-sm-attach="${x.id}">Rattacher</button><button class="btn ghost sm" data-sm-ignore="${x.id}">Ignorer</button></div></div>`:''}
+ ${x.status=='to_validate'?`<div class="card"><h3>Message au client (brouillon à valider)</h3><div class="stacked">
+   <div><label for="sm-to">Destinataire</label><select id="sm-to">${x.recipients.map(r=>`<option value="${esc(r.email)}" ${r.email==x.to_email?'selected':''}>${esc(r.name)} (${r.role}) · ${esc(r.email)}</option>`).join('')}</select></div>
+   <div><label for="sm-s">Objet</label><input id="sm-s" value="${esc(x.draft_subject)}"></div>
+   <div><label for="sm-b">Message</label><textarea id="sm-b" style="min-height:280px">${esc(x.draft_body)}</textarea></div></div>
+   <div class="acts"><button class="btn" data-sm-send="${x.id}">Valider et envoyer</button><button class="btn ghost" data-sm-ignore="${x.id}">Ignorer</button></div></div>`:''}
+ ${x.status=='sent'?`<div class="card"><h3>Envoyé à ${esc(x.to_name)}</h3><div class="sub">Validé par ${esc(x.validated_by)} le ${new Date(x.sent_at+'Z').toLocaleString('fr-FR')}</div><div class="sub" style="margin-top:6px"><b>${esc(x.draft_subject)}</b></div><pre style="white-space:pre-wrap;font:inherit;margin-top:10px">${esc(x.draft_body)}</pre></div>`:''}
+ ${x.status=='ignored'?`<div class="card sub">Ignoré : ${esc(x.ignored_reason||'')}</div>`:''}`}
+$('#ml-root').addEventListener('click',async e=>{const r=e.target.closest('[data-ml]');if(r){const x=mlSent[+r.dataset.ml];$('#ml-subj').textContent=x.subject;$('#ml-meta').textContent=`À : ${x.to_name} <${x.to_email}> · modèle ${x.rule}`;$('#ml-body').textContent=x.body;return}
+ const b=e.target.closest('button');if(!b)return;
+ if(b.dataset.mltab){mlTab=b.dataset.mltab;loadMailing();return}
+ if(b.dataset.sm){mlSel=+b.dataset.sm;loadMailing();return}
+ try{
+  if(b.id=='sm-sim'){const it=await call('swanmail/simulate',{kind:$('#sm-kind').value});mlSel=it.id;toast('Email du partenaire reçu : brouillon prêt à valider')}
+  else if(b.id=='sm-paste'){const it=await call('swanmail/inbound',{from:$('#sm-from').value,subject:$('#sm-subj').value,text:$('#sm-text').value});mlSel=it.id;toast(it.status=='unmatched'?'Email reçu, dossier non trouvé':'Email analysé : brouillon prêt')}
+  else if(b.dataset.smSend){b.disabled=true;await call(`swanmail/${b.dataset.smSend}/send`,{to_email:$('#sm-to').value,subject:$('#sm-s').value,body:$('#sm-b').value});toast('Message validé et envoyé au client')}
+  else if(b.dataset.smIgnore){await call(`swanmail/${b.dataset.smIgnore}/ignore`,{reason:'Sans suite'});toast('Email ignoré')}
+  else if(b.dataset.smAttach){const it=await call(`swanmail/${b.dataset.smAttach}/attach`,{caseId:$('#sm-case').value});mlSel=it.id;toast('Email rattaché : brouillon prêt')}
+  else return;
+  loadMailing();}catch{b.disabled=false}});
+$('aside a[data-t=mailing]').addEventListener('click',async()=>{if(!capV){const v=await api('capital');if(v.case)capV=v}loadMailing()});
+api('swanmail').then(p=>{const nb=$('#nb-ml');nb.textContent=p.stats.to_validate;nb.style.display=p.stats.to_validate?'':'none'});
+api('config').then(c=>{$('#mode').textContent='Mode '+c.mode.toUpperCase()+' · API Swan';$('#main-link').href=c.mainUrl});
+if(location.hash=='#mailing'){go('mailing');api('capital').then(v=>{if(v.case)capV=v;loadMailing()})}else loadCapital();
+</script></body></html>

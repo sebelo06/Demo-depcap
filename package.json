@@ -1,0 +1,19 @@
+{
+  "name": "demo-depcap",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "start": "node capital-server.js",
+    "demo": "node scripts/demo-capital.mjs"
+  },
+  "engines": {
+    "node": ">=22.5"
+  },
+  "dependencies": {
+    "@fontsource/inter": "^5.3.0",
+    "@fontsource/nunito": "^5.3.0",
+    "@fontsource/source-serif-4": "^5.3.0",
+    "nodemailer": "^10.0.15",
+    "pdfkit": "^0.20.2"
+  }
+}

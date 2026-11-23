@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nova Pro – Votre dépôt de capital</title>
+<link rel="stylesheet" href="/nova.css">
+<style>
+body{display:block}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 20px;background:var(--side);color:#fff;flex-wrap:wrap}
+.top .logo{display:flex;align-items:center;gap:8px;font-weight:700}.top .logo i{width:18px;height:18px;border-radius:5px;background:#fff;display:inline-block}
+.as{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--sideink)}.as select{width:auto;padding:6px 10px;font-size:12.5px}
+.wrap{max-width:760px;margin:0 auto;padding:24px 16px 60px}
+.co{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.co h1{font-size:22px;letter-spacing:-.02em;margin:2px 0 0}
+.now{border:2px solid var(--ink);padding:24px}
+.eyebrow{font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+.now h2{font-size:21px;margin:6px 0 6px}.now .why{color:#3d3d38;margin:0 0 14px}
+.meta{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--mute);margin-bottom:16px}.meta b{color:var(--ink)}
+.now .btn{padding:12px 20px;font-size:15px}
+.then{margin-top:16px;padding-top:14px;border-top:1px solid var(--line);font-size:13px}.then li{margin:4px 0}
+.ibanbox{background:var(--bg);border-radius:10px;padding:14px;margin:0 0 14px;display:grid;grid-template-columns:110px 1fr;gap:6px 12px;font-size:13.5px}
+.ibanbox span:nth-child(odd){color:var(--mute)}.mono{font-family:ui-monospace,Menlo,monospace}
+.rules{font-size:12.5px;color:#3d3d38;margin:0 0 14px;padding-left:18px}.rules li{margin:3px 0}
+.dates{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.date{background:var(--bg);border-radius:12px;padding:16px}.date .d{font-size:22px;font-weight:700;letter-spacing:-.02em;margin:4px 0 2px}
+.date.done{background:var(--okbg)}.date.done .d{color:var(--ok)}
+.note{font-size:12px;color:var(--mute);margin-top:10px}
+.wl{list-style:none;margin:0;padding:0}.wl li{display:flex;gap:12px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}.wl li:first-child{border-top:0;padding-top:0}
+.wl .t{flex:1;min-width:0}.wl .s{font-size:12.5px;color:var(--mute)}.wl .late{color:var(--ko);font-weight:600}
+.who{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--gray);font-weight:700;font-size:12px;flex:none}
+.who.team{background:#e4ecff;color:#2845b8}.who.notary{background:#efe6ff;color:#5b3df5}
+.jr{list-style:none;margin:0;padding:0;position:relative}
+.jr li{display:grid;grid-template-columns:28px 1fr auto;gap:12px;padding:0 0 18px;position:relative}
+.jr li:not(:last-child)::before{content:"";position:absolute;left:13px;top:28px;bottom:2px;width:2px;background:var(--line)}
+.jr li.s-done:not(:last-child)::before{background:var(--ok)}
+.jr .jd{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;background:var(--gray);color:var(--mute)}
+.s-done .jd{background:var(--ok);color:#fff}.s-current .jd{background:var(--ink);color:#fff;box-shadow:0 0 0 4px #e3e3de}
+.jr b{display:block;color:var(--ink)}.s-todo b{color:#55554f;font-weight:600}.jr .s{font-size:12.5px;color:var(--mute)}.jr .when{font-size:12.5px;text-align:right;white-space:nowrap;color:var(--mute)}.jr .when b{color:var(--ink)}
+.s-current b{font-size:15px}.s-goal div:not(.when)>b::after{content:" · étape clé";font-weight:500;color:var(--accent);font-size:12px}
+.prog{height:6px;border-radius:99px;background:var(--gray);overflow:hidden;margin-top:6px}.prog i{display:block;height:100%;background:var(--ok)}
+.ok-ic{color:var(--ok);font-weight:700}
+details.hist summary{cursor:pointer;font-weight:600}
+.lnk{background:none;border:0;padding:0;color:var(--accent);font:inherit;font-weight:600;cursor:pointer}
+.empty{text-align:center;padding:40px 20px}
+@media(max-width:600px){.dates{grid-template-columns:1fr}.jr li{grid-template-columns:28px 1fr}.jr .when{grid-column:2;text-align:left}.ibanbox{grid-template-columns:1fr}.now{padding:18px}}
+</style></head><body>
+<div class="top"><a class="logo" href="/" title="Accueil" style="color:#fff;text-decoration:none"><i></i>Nova Pro</a>
+ <div class="as"><span>Maquette · voir en tant que</span><select id="as" aria-label="Voir la page en tant que"></select><a href="/" style="color:var(--sideink)">Accueil</a> <a href="/agent" style="color:var(--sideink)">Console formaliste ›</a></div></div>
+<div class="wrap" id="root"><div class="card empty sub">Chargement…</div></div>
+
+<dialog id="cap-doc-dlg"><div style="padding:28px"><div id="cd-head"></div><div id="cd-checks" style="margin:12px 0"></div><div id="cd-seen" class="stacked" style="display:grid;gap:10px"></div>
+ <div style="margin:12px 0"><label for="cd-file">Fichier (pdf, png ou jpg, 5 Mo max)</label><input type="file" id="cd-file" accept=".pdf,.png,.jpg,.jpeg"></div><div id="cd-warn"></div>
+ <div class="acts"><button class="btn ghost" onclick="this.closest('dialog').close()">Annuler</button> <button class="btn" id="cd-send" disabled>Envoyer</button></div></div></dialog>
+<div id="toast"></div>
+<script>
+const $=s=>document.querySelector(s);
+const esc=v=>String(v??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const api=(p,o)=>fetch('/api/'+p,o&&{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(o)}).then(r=>r.json());
+const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2600)};
+const capE=x=>(x/100).toLocaleString('fr-FR',{style:'currency',currency:'EUR'});
+const ini=s=>String(s).split(/\s+/).slice(0,2).map(w=>w[0]).join('').toUpperCase();
+const qs=new URLSearchParams(location.search);
+let V=null,asId=Number(qs.get('as'))||null,NOW=new Date();
+// Dates : « jeu. 4 déc. » + relatif (« demain », « dans 3 j »)
+const day=d=>new Date(d).toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'});
+const dayDiff=d=>{const a=new Date(NOW);a.setHours(0,0,0,0);const b=new Date(d);b.setHours(0,0,0,0);return Math.round((b-a)/864e5)};
+const rel=d=>{const n=dayDiff(d);return n==0?'aujourd’hui':n==1?'demain':n==-1?'hier':n>0?`dans ${n} j`:`il y a ${-n} j`};
+const ago=d=>{const n=-dayDiff(d);return n<=0?'depuis aujourd’hui':n==1?'depuis hier':`depuis ${n} jours`};
+const WHO={team:'Notre équipe',notary:'Le notaire'};
+
+async function load(){const id=qs.get('id');V=await api('capital'+(id?'?id='+id:''));NOW=new Date(V.plan?.now||Date.now());render();if(V.case)loadMsgs(V.shareholders.find(s=>s.id==asId))}
+function render(){
+ if(!V.case){$('#root').innerHTML='<div class="card empty"><h3>Aucun dossier de dépôt de capital</h3><div class="sub">Créez-en un depuis la console formaliste ou l’atelier.</div></div>';return}
+ const c=V.case,S=V.shareholders,p=V.plan;
+ if(!asId||!S.some(s=>s.id==asId))asId=S.find(s=>s.is_admin)?.id||S[0].id;
+ const me=S.find(s=>s.id==asId),founder=!!me.is_admin;
+ $('#as').innerHTML=S.map(s=>`<option value="${s.id}" ${s.id==asId?'selected':''}>${esc(s.name)} (${s.is_admin?'fondateur':'associé'})</option>`).join('');
+ const mine=p.todos[me.id]||[];
+ // Ce qu'on attend des autres : actions des autres associés + notre équipe / notaire
+ const others=S.filter(s=>s.id!=me.id).flatMap(s=>(p.todos[s.id]||[]).map(t=>({...t,who:s.name,sh:s,title:t.title.replace(/votre/g,'son')})));
+ const waits=[...others,...p.waiting.map(w=>({...w,who:WHO[w.who],kind:w.who}))];
+ const closed=['Completed','Canceled'].includes(c.status);
+ $('#root').innerHTML=`
+  <div class="co"><div><div class="sub">Dépôt de capital · dossier ${esc(c.ref)}</div><h1>${esc(c.company_name)}</h1><div class="sub">Bonjour ${esc(me.name.split(' ')[0])} · ${founder?'vous pilotez le dossier':'associé'}</div></div>
+   <span class="pill ${c.status=='Completed'?'t-ok':c.status=='Canceled'?'t-ko':mine.length||others.length?'t-warn':'t-info'}">${closed?esc(c.label):mine.length?'Action requise':others.length?'En attente d’un associé':'En cours, rien à faire'}</span></div>
+  ${nextCard(c,me,mine,waits,others,founder)}
+  ${closed&&c.status=='Canceled'?'':datesCard(c,p)}
+  ${waits.length&&!closed?waitCard(waits,founder):''}
+  ${journeyCard(c)}
+  ${founder?sharesCard(c,S):myShareCard(me)}
+  ${msgsCard(me)}
+  ${docsCard(c,me,founder)}
+  <div class="card"><details class="hist"><summary>Historique du dossier</summary><ul class="wl" style="margin-top:12px">${V.timeline.map(e=>`<li><div class="t">${esc(e.text)}<div class="s">${new Date(e.created_at+'Z').toLocaleString('fr-FR',{dateStyle:'medium',timeStyle:'short'})}</div></div></li>`).join('')}</ul></details></div>`;
+}
+// 1. La prochaine action, et une seule mise en avant
+// Quand c'est un autre associé qui bloque : on le dit clairement, avec le motif et (pour le fondateur) une relance
+// « Remplacer : Justificatif de domicile » → « remplacer son justificatif de domicile »
+const POSS={'Pièce d’identité':'sa','Statuts':'ses'};
+const phrase=t=>{const d=t.docId&&V.documents.find(x=>x.id==t.docId);if(d){const p=POSS[d.label]||'son',l=d.label.charAt(0).toLowerCase()+d.label.slice(1);return `${t.urgent?'remplacer':'déposer'} ${p} ${l}`}
+ return t.title.replace(/votre/g,'son').replace(/^./,x=>x.toLowerCase())};
+const lastRemind=sh=>V.messages.filter(m=>m.rule=='relance'&&m.to_email==sh.email).map(m=>m.created_at)[0];
+function blockedCard(others,founder){const t=others[0],sh=t.sh,first=sh.name.split(' ')[0],lr=lastRemind(sh);
+ const canRemind=founder&&V.actions.some(a=>a.id=='remind:'+sh.id);
+ const what=phrase(t);
+ return `<div class="card now" style="border-color:var(--warn)"><div class="eyebrow" style="color:var(--warn)">${t.urgent?'Dossier en pause · action d’un associé':'En attente d’un associé'}</div>
+  <h2>${esc(sh.name)} doit ${esc(what)}</h2>
+  ${t.why?`<p class="why">${t.urgent?'<b>Motif :</b> ':''}${esc(t.why)}</p>`:''}
+  <div class="meta"><span>${t.since?'En attente '+ago(t.since):''}</span>${lr?`<span>Dernière relance : <b>${rel(lr.replace(' ','T')+'Z')}</b></span>`:''}<span>${founder?'Vous n’avez rien à faire vous-même :':'Le fondateur suit ce point.'} ${founder?`${esc(first)} a reçu un email avec la marche à suivre.`:''}</span></div>
+  ${canRemind?`<button class="btn" data-act="remind:${sh.id}">Relancer ${esc(first)}</button> <span class="sub">Lui renvoie l’email avec ${t.urgent?'le motif et ':''}le lien</span>`:''}
+  ${others.length>1?`<div class="then"><b>Autres actions attendues</b><ul style="margin:6px 0 0;padding-left:18px">${others.slice(1).map(o=>`<li>${esc(o.who)} doit ${esc(phrase(o))}</li>`).join('')}</ul></div>`:''}</div>`}
+function nextCard(c,me,mine,waits,others,founder){
+ if(c.status=='Completed')return `<div class="card now"><div class="eyebrow">Terminé</div><h2>Le capital de ${capE(c.total_cents)} est sur votre compte pro</h2><p class="why">Viré le ${day(c.completed_at)}. La société peut démarrer son activité.</p><a class="btn ghost" target="_blank" href="/api/capital/${c.id}/certificate.pdf">Revoir l’attestation de dépôt</a></div>`;
+ if(c.status=='Canceled')return `<div class="card now"><div class="eyebrow">Dossier arrêté</div><h2>${c.cancel_sensitive?'Ce dossier ne peut pas aboutir':'Dossier annulé'}</h2><p class="why">${c.cancel_sensitive?'Un conseiller va vous contacter pour vous expliquer la suite, notamment pour les fonds déjà versés.':esc(c.cancel_label||c.cancel_note||'')}</p></div>`;
+ if(!mine.length&&others.length)return blockedCard(others.sort((a,b)=>!!b.urgent-!!a.urgent),founder);
+ if(!mine.length){const w=waits.find(x=>x.kind)||waits[0];
+  return `<div class="card now"><div class="eyebrow">Rien à faire de votre côté</div><h2>${w?esc(w.who)+' : '+esc(w.title.charAt(0).toLowerCase()+w.title.slice(1)):'Votre dossier avance'}</h2>
+   <p class="why">${w?.due?`Réponse attendue ${w.late?'<b style="color:var(--ko)">en retard, nous relançons</b>':`d’ici le <b>${day(w.due)}</b> (${rel(w.due)})`}.`:'Nous vous prévenons par email dès qu’une action est attendue de vous.'}</p>
+   <div class="meta"><span>Vous recevrez un email à chaque étape.</span></div></div>`}
+ const t=mine[0],rest=mine.slice(1);
+ let body='';
+ if(t.kind=='transfer')body=`<div class="ibanbox"><span>IBAN</span><span><b class="mono">${esc(t.iban)}</b> <button class="lnk" data-copy="${esc(t.iban)}">Copier</button></span><span>Montant exact</span><span><b>${capE(t.amount_cents)}</b></span><span>Bénéficiaire</span><span>${esc(me.name)}</span></div>
+  <ul class="rules"><li>Depuis un compte bancaire <b>à votre nom</b> (pas celui d’un proche ni d’une société)</li><li>Virement SEPA, de préférence instantané (sinon 1 jour ouvré)</li><li>${t.attempts_left<2?`<b style="color:var(--ko)">Dernière tentative</b> : un second refus arrête le dossier`:'Deux tentatives au maximum'}</li></ul>`;
+ if(t.kind=='sign')body=`<ul class="rules" style="list-style:none;padding:0">${t.docs.map(d=>`<li>📄 <a target="_blank" href="${esc(V.documents.find(x=>x.id==d.id)?.preview||'#')}">${esc(d.label)}</a> <span class="sub">· préparé à partir de votre dossier</span></li>`).join('')}</ul>`;
+ if(t.kind=='register')body=`<ol class="rules"><li>Téléchargez l’attestation de dépôt des fonds.</li><li>Déposez votre demande d’immatriculation sur le guichet unique en la joignant.</li><li>Dès réception de l’extrait Kbis, déposez-le ici : le capital est viré sous ${V.plan.sla.release} jours ouvrés.</li></ol>`;
+ const btn=t.kind=='sign'?`<button class="btn" data-act="${t.act}">Signer électroniquement</button>`
+  :t.kind=='kyc'?`<button class="btn" data-act="${t.act}">${t.urgent?'Refaire la vérification':'Commencer la vérification'}</button>`
+  :t.kind=='doc'?`<button class="btn" data-doc="${t.docId}">${t.urgent?'Déposer la nouvelle version':'Déposer le document'}</button>`
+  :t.kind=='transfer'?`<button class="btn" data-act="${t.act}">J’ai fait le virement</button> <span class="sub">Maquette : simule l’arrivée des fonds</span>`
+  :t.kind=='answer'?`<button class="btn" data-act="answer">J’ai envoyé le complément</button>`
+  :t.kind=='register'?`<a class="btn" target="_blank" href="${t.href}">Télécharger l’attestation</a>`:'';
+ const unlock={sign:'Envoyés pour vérification dès que tous les associés ont signé',kyc:'Débloque votre IBAN de dépôt',transfer:'Votre apport sera reçu sous 1 jour ouvré',doc:'Vérifié sous '+V.plan.sla.docCheck+' jour ouvré',answer:'Vérification reprise sous '+V.plan.sla.review+' jours ouvrés',register:'Délai habituel du greffe : environ '+V.plan.sla.registration+' jours ouvrés'}[t.kind];
+ return `<div class="card now" id="next"><div class="eyebrow">${t.urgent?'<span style="color:var(--ko)">À corriger</span>':'À faire maintenant'}${mine.length>1?` · 1 sur ${mine.length}`:''}</div>
+  <h2>${esc(t.title)}</h2><p class="why">${esc(t.why||'')}</p>
+  <div class="meta">${t.duration?`<span>⏱ <b>${t.duration}</b></span>`:''}${unlock?`<span>→ ${unlock}</span>`:''}</div>
+  ${body}${btn}
+  ${rest.length?`<div class="then"><b>Ensuite</b><ul style="margin:6px 0 0;padding-left:18px">${rest.map(r=>`<li>${esc(r.title)}${r.kind=='doc'?` · <button class="lnk" data-doc="${r.docId}">déposer</button>`:''}</li>`).join('')}</ul></div>`:''}</div>`}
+// 2. Les deux dates qui comptent
+function datesCard(c,p){const e=p.estimates,D=(k,lab,doneLab)=>{const x=e[k]||{};return `<div class="date ${x.done?'done':''}"><div class="lbl">${lab}</div><div class="d">${x.date?day(x.date):'—'}</div><div class="sub">${x.done?doneLab:x.date?'estimée · '+rel(x.date):''}</div></div>`};
+ const late=p.waiting.filter(w=>w.late);
+ return `<div class="card"><h3>Vos dates clés</h3><div class="dates">${D('certificate','Attestation de dépôt des fonds','délivrée')}${D('release','Capital sur votre compte pro','viré')}</div>
+  ${late.length?`<div class="warn bad" style="margin-top:12px">${late.map(w=>`${esc(WHO[w.who])} a du retard sur « ${esc(w.title)} » (prévu le ${day(w.due)}). Nous relançons.`).join('<br>')}</div>`:''}
+  <div class="note">${c.certificate_at?'':'Estimation si chaque action en attente est faite aujourd’hui. '}Délais en jours ouvrés : vérification ${p.sla.review} j, attestation ${p.sla.certificate} j, immatriculation ≈ ${p.sla.registration} j (greffe), libération ${p.sla.release} j.</div></div>`}
+// 3. Qui doit agir, depuis quand
+function waitCard(w,founder){return `<div class="card"><h3>En attente</h3><ul class="wl">${w.map(x=>`<li><span class="who ${x.kind||''}">${x.kind?(x.kind=='team'?'NP':'N'):ini(x.who)}</span>
+  <div class="t"><b>${esc(x.who)}</b> · ${esc(x.title)}<div class="s">${x.since?ago(x.since):''}${x.due?` · ${x.late?`<span class="late">prévu le ${day(x.due)}, en retard</span>`:`prévu d’ici le ${day(x.due)}`}`:''}</div></div>
+  ${founder&&x.sh&&V.actions.some(a=>a.id=='remind:'+x.sh.id)?`<button class="btn ghost sm" data-act="remind:${x.sh.id}">Relancer</button>`:''}</li>`).join('')}</ul></div>`}
+// 4. Le parcours, avec une date sur chaque étape
+function journeyCard(c){return `<div class="card"><h3>Votre parcours</h3><ol class="jr">${V.steps.map((s,i)=>`<li class="s-${s.state}${s.goal?' s-goal':''}"><span class="jd">${s.state=='done'?'✓':i+1}</span><div><b>${esc(s.title)}</b><span class="s">${esc(s.desc)}</span></div>
+  <div class="when">${s.state=='done'?(s.done_at?'fait le '+day(s.done_at):'fait'):c.status=='Canceled'?'':s.eta?(s.state=='current'?'prévu ':'≈ ')+'<b>'+day(s.eta)+'</b>':''}</div></li>`).join('')}</ol></div>`}
+function sharesCard(c,S){const pct=c.total_cents?Math.round(V.funded/c.total_cents*100):0;
+ return `<div class="card"><h3>Apports des associés</h3><div style="display:flex;justify-content:space-between"><span><b>${capE(V.funded)}</b> reçus sur ${capE(c.total_cents)}</span><span class="sub">${pct} %</span></div><div class="prog"><i style="width:${pct}%"></i></div>
+  <ul class="wl" style="margin-top:14px">${S.map(s=>`<li><span class="who">${ini(s.name)}</span><div class="t"><b>${esc(s.name)}</b>${s.is_admin?' <span class="sub">(vous)</span>':''}<div class="s">${esc(s.label)}</div></div><b>${capE(s.amount_cents)}</b></li>`).join('')}</ul></div>`}
+function myShareCard(me){return `<div class="card"><h3>Votre apport</h3><div style="display:flex;justify-content:space-between;align-items:center"><b style="font-size:18px">${capE(me.amount_cents)}</b><span class="pill ${['CapitalTransferred','CapitalFundsWiredToNotary'].includes(me.status)?'t-ok':'t-warn'}">${esc(me.label)}</span></div></div>`}
+// Messages : uniquement nos échanges avec cette personne (le fil du partenaire n'apparaît jamais)
+let MSGS=[];
+async function loadMsgs(me){MSGS=await api(`client-messages?caseId=${V.case.id}&email=${encodeURIComponent(me.email)}`);const el=$('#msgs');if(el)el.outerHTML=msgsCard(me)}
+function msgsCard(me){if(!MSGS.length)return '<div id="msgs"></div>';
+ return `<div class="card" id="msgs"><h3>Messages de l’équipe Nova Pro</h3><ul class="wl">${MSGS.map(m=>`<li style="align-items:flex-start"><span class="who ${m.lane=='nous'?'team':''}">${m.lane=='nous'?'NP':ini(me.name)}</span><div class="t"><b>${m.lane=='nous'?'Nova Pro':'Vous'}</b> <span class="s">· ${new Date(m.created_at).toLocaleString('fr-FR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</span><div style="white-space:pre-wrap;margin-top:4px;font-size:13px">${esc(m.body)}</div></div></li>`).join('')}</ul>
+  <div style="margin-top:12px"><label for="m-reply">Répondre</label><textarea id="m-reply" style="width:100%;font:inherit;padding:10px;border:1px solid var(--line);border-radius:8px;min-height:80px" placeholder="Votre réponse à l’équipe"></textarea><div style="margin-top:8px"><button class="btn sm" id="m-send">Envoyer</button> <span class="sub">En vrai, le client répond simplement à l’email reçu.</span></div></div></div>`}
+function docsCard(c,me,founder){const ds=V.documents.filter(d=>!d.notary&&(d.shareholder_id==me.id||(founder&&!d.shareholder_id)));
+ const st=d=>d.generated&&d.status=='Pending'?`<span class="pill t-warn">À signer · ${V.shareholders.filter(x=>x.signed_at).length}/${V.shareholders.length}</span>`:d.generated&&d.status=='Refused'?'<span class="pill t-info">Nouvelle version en préparation</span>':d.status=='Validated'?'<span class="ok-ic">✓ Validé</span>':d.status=='Refused'?'<span class="pill t-ko">Refusé</span>':d.status=='Uploaded'?'<span class="pill t-info">En vérification</span>':'<span class="pill t-warn">À déposer</span>';
+ return `<div class="card"><h3>${founder?'Documents dont vous êtes responsable':'Vos documents'}</h3><table><tbody>${ds.map(d=>`<tr><td>${esc(d.label)}${d.generated?`<div class="sub">Préparé par Nova Pro · <a target="_blank" href="${esc(d.preview)}">voir</a></div>`:d.shareholder_id?'':'<div class="sub">'+esc(c.company_name)+'</div>'}${d.explanation&&!d.generated?`<div class="sub" style="color:var(--ko)">${esc(d.explanation.title)} : ${d.explanation.note?esc(d.explanation.note).replace(/\n/g,'<br>'):esc(d.explanation.fix)}</div>`:''}</td><td class="r">${st(d)}${d.uploadable?` <button class="btn sm" data-doc="${d.id}">${d.status=='Refused'?'Remplacer':'Déposer'}</button>`:''}</td></tr>`).join('')}</tbody></table></div>`}
+
+// Actions
+document.addEventListener('click',async e=>{const b=e.target.closest('button');if(!b)return;
+ if(b.dataset.copy){try{await navigator.clipboard.writeText(b.dataset.copy);toast('IBAN copié')}catch{toast(b.dataset.copy)}return}
+ if(b.dataset.doc){openDoc(+b.dataset.doc);return}
+ if(b.dataset.act){b.disabled=true;const r=await api(`capital/${V.case.id}/act`,{action:b.dataset.act});if(r.error){toast(r.error);b.disabled=false;return}
+  V=r;NOW=new Date(r.plan.now);render();toast(b.dataset.act.startsWith('remind')?'Relance envoyée':'C’est noté');scrollTo({top:0,behavior:'smooth'})}});
+$('#as').onchange=e=>{asId=+e.target.value;const u=new URL(location);u.searchParams.set('as',asId);history.replaceState(null,'',u);MSGS=[];render();loadMsgs(V.shareholders.find(s=>s.id==asId))};
+document.addEventListener('click',async e=>{if(e.target.id!='m-send')return;const me=V.shareholders.find(s=>s.id==asId),txt=$('#m-reply').value.trim();if(!txt)return;
+ const r=await api('client-messages/reply',{caseId:V.case.id,email:me.email,text:txt});if(r.error)return toast(r.error);MSGS=r;$('#msgs').outerHTML=msgsCard(me);toast('Message envoyé')});
+// Dépôt de document : points de contrôle + cohérence avec le dossier (comme dans l'atelier)
+let doc=null,force=false;
+function openDoc(id){const d=V.documents.find(x=>x.id==id);doc=d;const r=d.rule||{checks:[]};
+ $('#cd-head').innerHTML=`<h3 style="margin:0">${esc(d.label)}</h3><div class="sub">${esc(d.owner)}</div>${d.explanation?`<div class="warn bad" style="margin:10px 0 0"><b>Refus précédent : ${esc(d.explanation.title)}</b><br>${esc(d.explanation.fix)}</div>`:''}`;
+ $('#cd-checks').innerHTML='<b>Avant d’envoyer, vérifiez :</b>'+r.checks.map(c=>`<label style="display:flex;gap:8px;align-items:flex-start;font-weight:400;margin:8px 0 0"><input type="checkbox" class="cd-ck" style="width:auto;margin-top:3px"><span>${esc(c)}</span></label>`).join('');
+ const need=r.declared;$('#cd-seen').innerHTML=need=='address'||need=='companyAddress'?`<div><label for="cd-address">Adresse figurant sur le document</label><input id="cd-address" placeholder="Recopiez l’adresse telle qu’elle apparaît"></div>`:need=='company'?`<div><label for="cd-name">Raison sociale figurant sur le document</label><input id="cd-name" placeholder="Recopiez-la telle qu’elle apparaît"></div>`:'';
+ $('#cd-file').value='';$('#cd-warn').innerHTML='';force=false;$('#cd-send').textContent='Envoyer';ck();$('#cap-doc-dlg').showModal()}
+const ck=()=>{$('#cd-send').disabled=![...document.querySelectorAll('.cd-ck')].every(x=>x.checked)||!$('#cd-file').files[0]};
+$('#cd-checks').addEventListener('change',ck);$('#cd-file').addEventListener('change',ck);
+$('#cd-send').onclick=async()=>{const f=$('#cd-file').files[0];
+ const o=await api(`capital/${V.case.id}/docs/${doc.id}`,{filename:f.name,size:f.size,confirmed:true,force,seen:{address:$('#cd-address')?.value,name:$('#cd-name')?.value}});
+ if(o.warnings?.length){$('#cd-warn').innerHTML=`<div class="warn bad"><b>Écart avec votre dossier</b><br>• ${o.warnings.map(esc).join('<br>• ')}<br><span class="sub">Corrigez, ou envoyez quand même (risque de refus).</span></div>`;force=true;$('#cd-send').textContent='Envoyer quand même';return}
+ if(o.error){$('#cd-warn').innerHTML=`<div class="warn bad">${esc(o.error)}</div>`;return}
+ $('#cap-doc-dlg').close();V=o;NOW=new Date(o.plan.now);render();toast('Document envoyé, vérification sous 1 jour ouvré')};
+load();
+</script></body></html>

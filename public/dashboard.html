@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nova Pro – Refus de documents</title>
+<link rel="stylesheet" href="/nova.css">
+<style>
+body{display:block}
+.viz-root{--series-1:#2a78d6;--grid:#e8e8e4;--text-primary:#0d0d0d;--text-secondary:#52514e;--text-muted:#76766f;
+ --seq-100:#cde2fb;--seq-200:#9ec5f4;--seq-300:#6da7ec;--seq-400:#3987e5;--seq-500:#256abf;--seq-600:#184f95;--seq-700:#0d366b}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 20px;background:var(--side);color:#fff;flex-wrap:wrap;position:sticky;top:0;z-index:5}
+.top .logo{display:flex;align-items:center;gap:8px;font-weight:700;color:#fff;text-decoration:none}.top .logo i{width:18px;height:18px;border-radius:5px;background:#fff;display:inline-block}.top .logo small{font-weight:500;color:var(--sideink)}
+.top nav{display:flex;gap:14px;font-size:12.5px}.top nav a{color:var(--sideink)}
+.wrap{max-width:1240px;margin:0 auto;padding:20px 20px 60px}
+.head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.head h1{font-size:22px;letter-spacing:-.02em;margin:0}
+.filters{display:flex;gap:10px;flex-wrap:wrap}
+.seg{display:inline-flex;background:var(--card);border:1px solid var(--line);border-radius:9px;padding:2px}
+.seg button{white-space:nowrap;border:0;background:none;padding:6px 11px;font:inherit;font-size:12.5px;border-radius:7px;cursor:pointer;color:var(--text-secondary)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:#fff}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+.kpi .v{font-size:28px;font-weight:700;letter-spacing:-.02em;margin:4px 0 2px;font-variant-numeric:tabular-nums}
+.kpi .s{font-size:12px;color:var(--text-muted)}
+.insight{border-left:3px solid var(--series-1);background:#f2f7fe;border-radius:0 12px 12px 0;padding:14px 16px;margin-bottom:16px;font-size:13.5px}
+.insight b{font-weight:700}.insight .s{font-size:12.5px;color:var(--text-secondary);margin-top:6px}
+.g2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+.card h3{display:flex;justify-content:space-between;align-items:baseline;gap:10px}.card h3 small{font-weight:400;color:var(--text-muted);font-size:12px}
+/* Barres horizontales : une seule série, une seule couleur, ancrées à gauche, extrémité arrondie */
+.bars{display:grid;gap:12px}
+.bar{display:grid;grid-template-columns:minmax(130px,200px) minmax(0,1fr) auto;gap:12px;align-items:center;font-size:13px;cursor:default;padding:2px 0}
+.bar .nm{color:var(--text-primary);line-height:1.3}
+.bar .tr{position:relative;height:14px;border-left:1px solid var(--grid)}
+.bar .fill{position:absolute;left:0;top:0;bottom:0;background:var(--series-1);border-radius:0 4px 4px 0;min-width:3px}
+.bar .val{font-variant-numeric:tabular-nums;color:var(--text-primary);white-space:nowrap;font-weight:600}.bar .val small{font-weight:400;color:var(--text-muted)}
+.bar:hover .fill,.bar:focus .fill{background:var(--seq-500)}.bar:focus{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+.sub2{font-size:11.5px;color:var(--text-muted);grid-column:2/4;margin-top:-6px}
+/* Heatmap document × motif : rampe bleue séquentielle, 2px d'espace entre cellules */
+.hm{overflow:auto}.hm table{border-collapse:separate;border-spacing:2px;width:auto;min-width:100%}
+.hm th{font-size:11.5px;font-weight:600;color:var(--text-secondary);padding:4px 6px;text-align:left;vertical-align:bottom}
+.hm th.col{max-width:110px;white-space:normal;line-height:1.25}
+.hm td{border:0;padding:0;height:38px;min-width:64px;text-align:center;font-weight:700;font-size:13px;border-radius:4px;font-variant-numeric:tabular-nums}
+.hm td.z{background:#f4f4f2;color:#c3c2bd;font-weight:400}
+.hm tbody tr:hover{background:none}
+.legend{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--text-muted);margin-top:10px}.legend i{display:inline-block;width:22px;height:10px;border-radius:2px}
+#tip{position:fixed;pointer-events:none;z-index:20;background:#0d0d0d;color:#fff;font-size:12px;line-height:1.45;padding:8px 10px;border-radius:8px;max-width:280px;opacity:0;transition:opacity .08s}
+#tip b{display:block;font-size:12.5px}
+.tbl td{font-size:13px}.tbl .sub{font-size:12px}
+.src{font-size:11px;font-weight:600;padding:2px 7px;border-radius:99px;background:var(--gray);color:#4a4a45;white-space:nowrap}
+.empty{text-align:center;padding:50px 20px;color:var(--text-muted)}
+@media(max-width:900px){.kpis{grid-template-columns:1fr 1fr}.g2{grid-template-columns:1fr}.bar{grid-template-columns:110px minmax(0,1fr) auto}}
+</style></head><body>
+<div class="top"><a class="logo" href="/" title="Accueil"><i></i>Nova Pro <small>· Dépôt de capital · refus de documents</small></a>
+ <nav><a href="/">Accueil</a><a href="/agent">Console formaliste</a><a href="/client" target="_blank">Vue client ↗</a></nav></div>
+<div class="wrap viz-root">
+ <div class="head"><div><div class="sub">Tableau de bord</div><h1>Documents refusés et motifs</h1></div>
+  <div class="filters"><div class="seg" role="group" aria-label="Période" id="f-days"><button data-days="30">30 j</button><button data-days="90">90 j</button><button data-days="365">12 mois</button></div>
+   <div class="seg" role="group" aria-label="Refusé par" id="f-src"><button data-src="all">Tous</button><button data-src="partner">Partenaire</button><button data-src="notary">Notaire</button></div></div></div>
+ <div id="root"><div class="card empty">Chargement…</div></div>
+</div>
+<div id="tip" role="tooltip"></div>
+<script>
+const $=s=>document.querySelector(s);
+const esc=v=>String(v??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const pct=x=>x==null?'—':Math.round(x*100)+' %';
+const SRC={partner:'Partenaire',formaliste:'Formaliste',notary:'Notaire'};
+let F={days:90,source:'all'};try{Object.assign(F,JSON.parse(localStorage.getItem('refusalFilters')||'{}'))}catch{}if(F.source=='formaliste')F.source='all';
+async function load(){
+ document.querySelectorAll('#f-days button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.days==F.days));
+ document.querySelectorAll('#f-src button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.src==F.source));
+ try{localStorage.setItem('refusalFilters',JSON.stringify(F))}catch{}
+ const D=await fetch(`/api/capital/refusals?days=${F.days}&source=${F.source}`).then(r=>r.json());draw(D)}
+function draw(D){const k=D.kpis;
+ if(!k.refusals){$('#root').innerHTML=`${kpis(k)}<div class="card empty">Aucun refus sur la période${F.source!='all'?' pour ce filtre':''}.</div>`;return}
+ const t=D.byType[0],r0=t.reasons[0],R=D.byReason[0];
+ $('#root').innerHTML=`${kpis(k)}
+  <div class="insight"><b>${esc(t.label)}</b> : ${t.refusals} refus sur ${k.refusals} (${pct(t.refusals/k.refusals)}), surtout « ${esc(r0.title)} » (${r0.n}).
+   ${R.prevent?`<div class="s">Premier motif tous documents confondus, « ${esc(R.title)} » (${pct(R.share)} des refus). Piste : ${esc(R.prevent)}</div>`:''}</div>
+  <div class="g2">
+   <div class="card"><h3>Documents les plus refusés <small>refus · taux de refus</small></h3><div class="bars">${bars(D.byType.map(x=>({key:'t:'+x.type,name:x.label,n:x.refusals,label:`${x.refusals} <small>· ${pct(x.rate)}</small>`,sub:x.reasons.slice(0,2).map(r=>`${r.title} (${r.n})`).join(' · ')})))}</div></div>
+   <div class="card"><h3>Motifs de refus <small>refus · part du total</small></h3><div class="bars">${bars(D.byReason.map(x=>({key:'r:'+x.code,name:x.title,n:x.n,label:`${x.n} <small>· ${pct(x.share)}</small>`,sub:x.types.slice(0,2).map(t=>`${t.label} (${t.n})`).join(' · ')})))}</div></div>
+  </div>
+  <div class="card"><h3>Quel document, pour quel motif <small>nombre de refus</small></h3>${heat(D)}</div>
+  <div class="card"><h3>Derniers refus <small>${D.recent.length} plus récents</small></h3><div style="overflow:auto"><table class="tbl"><thead><tr><th>Date</th><th>Dossier</th><th>Document</th><th>Motif</th><th>Refusé par</th></tr></thead><tbody>
+   ${D.recent.map(x=>`<tr><td class="sub" style="white-space:nowrap">${new Date(x.created_at.replace(' ','T')+'Z').toLocaleDateString('fr-FR',{day:'numeric',month:'short'})}</td><td><a href="/agent?id=${x.caseId}"><b>${esc(x.company)}</b></a><div class="sub mono">${esc(x.ref)}</div></td><td>${esc(x.label)}<div class="sub">${esc(x.owner)}</div></td><td>${esc(x.reason)}${x.comment?`<div class="sub" title="${esc(x.comment)}">« ${esc(x.comment.length>90?x.comment.slice(0,90)+'…':x.comment)} »</div>`:''}</td><td><span class="src">${SRC[x.source]}</span></td></tr>`).join('')}</tbody></table></div></div>`;
+ TIP=D}
+function kpis(k){const T=(l,v,s)=>`<div class="kpi"><div class="lbl">${l}</div><div class="v">${v}</div><div class="s">${s}</div></div>`;
+ return `<div class="kpis">${T('Refus',k.refusals,k.repeat?`${k.repeat} document${k.repeat>1?'s':''} refusé${k.repeat>1?'s':''} 2 fois ou plus`:'aucun document refusé deux fois')}${T('Taux de refus',pct(k.rate),`${k.refusals} refus sur ${k.submitted} versions soumises`)}
+  ${T('Acceptés du premier coup',pct(k.firstTime),`sur ${k.decided} document${k.decided>1?'s':''} validé${k.decided>1?'s':''}`)}${T('Dossiers touchés',`${k.cases}<span style="font-size:16px;color:var(--text-muted)"> / ${k.casesTotal}</span>`,'au moins un refus sur la période')}</div>`}
+// Barres : échelle commune au maximum de la carte, valeur et détail en texte (jamais la couleur seule)
+function bars(xs){const max=Math.max(...xs.map(x=>x.n),1);
+ return xs.map(x=>`<div class="bar" tabindex="0" data-tip="${esc(x.key)}"><span class="nm" title="${esc(x.name)}">${esc(x.name)}</span><span class="tr"><span class="fill" style="width:${x.n/max*100}%"></span></span><span class="val">${x.label}</span>${x.sub?`<span class="sub2">${esc(x.sub)}</span>`:''}</div>`).join('')}
+// Heatmap : pas de 100 à 700 selon le nombre ; encre claire sur les pas foncés
+function heat(D){const M=D.matrix,max=Math.max(...Object.values(M.cells),1),steps=[100,200,300,400,500,600,700];
+ const cell=(t,r)=>{const n=M.cells[`${t.type}|${r.code}`]||0;if(!n)return `<td class="z" data-tip="c:${t.type}|${r.code}">·</td>`;
+  const s=steps[Math.min(steps.length-1,Math.max(0,Math.round(n/max*(steps.length-1))))];
+  return `<td tabindex="0" data-tip="c:${t.type}|${r.code}" style="background:var(--seq-${s});color:${s>=400?'#fff':'var(--text-primary)'}">${n}</td>`};
+ return `<div class="hm"><table><thead><tr><th></th>${M.reasons.map(r=>`<th class="col" scope="col">${esc(r.title)}</th>`).join('')}</tr></thead><tbody>
+  ${M.types.map(t=>`<tr><th scope="row">${esc(t.label)}</th>${M.reasons.map(r=>cell(t,r)).join('')}</tr>`).join('')}</tbody></table></div>
+  <div class="legend">Moins <i style="background:var(--seq-100)"></i><i style="background:var(--seq-300)"></i><i style="background:var(--seq-500)"></i><i style="background:var(--seq-700)"></i> Plus · max ${max} refus</div>`}
+// Infobulle au survol et au focus clavier
+let TIP=null;const tip=$('#tip');
+function tipFor(key){const D=TIP;if(!D)return '';const [k,v]=[key.slice(0,1),key.slice(2)];
+ if(k=='t'){const x=D.byType.find(t=>t.type==v);return `<b>${esc(x.label)}</b>${x.refusals} refus sur ${x.submitted} versions soumises (${pct(x.rate)})<br>${x.reasons.map(r=>`${esc(r.title)} : ${r.n}`).join('<br>')}`}
+ if(k=='r'){const x=D.byReason.find(r=>r.code==v);return `<b>${esc(x.title)}</b>${x.n} refus (${pct(x.share)} du total)<br>${x.types.map(t=>`${esc(t.label)} : ${t.n}`).join('<br>')}${x.prevent?`<br><br>Piste : ${esc(x.prevent)}`:''}`}
+ if(k=='c'){const [t,r]=v.split('|'),n=D.matrix.cells[v]||0;return `<b>${esc(D.matrix.types.find(x=>x.type==t).label)}</b>${esc(D.matrix.reasons.find(x=>x.code==r).title)} : ${n} refus`}}
+const show=(el,x,y)=>{tip.innerHTML=tipFor(el.dataset.tip);tip.style.opacity=1;const w=tip.offsetWidth,h=tip.offsetHeight;tip.style.left=Math.min(innerWidth-w-8,x+14)+'px';tip.style.top=Math.max(8,y-h-10)+'px'};
+document.addEventListener('mousemove',e=>{const el=e.target.closest('[data-tip]');if(!el){tip.style.opacity=0;return}show(el,e.clientX,e.clientY)});
+document.addEventListener('focusin',e=>{const el=e.target.closest('[data-tip]');if(!el)return;const r=el.getBoundingClientRect();show(el,r.left+r.width/2,r.top)});
+document.addEventListener('focusout',()=>tip.style.opacity=0);
+$('#f-days').onclick=e=>{const b=e.target.closest('button');if(b){F.days=+b.dataset.days;load()}};
+$('#f-src').onclick=e=>{const b=e.target.closest('button');if(b){F.source=b.dataset.src;load()}};
+load();
+</script></body></html>

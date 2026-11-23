@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nova Pro – Statuts du client</title>
+<link rel="stylesheet" href="/nova.css">
+<style>
+body{display:block}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 20px;background:var(--side);color:#fff;flex-wrap:wrap;position:sticky;top:0;z-index:5}
+.top .logo{display:flex;align-items:center;gap:8px;font-weight:700}.top .logo i{width:18px;height:18px;border-radius:5px;background:#fff;display:inline-block}.top .logo small{font-weight:500;color:var(--sideink)}
+.top a{color:var(--sideink);font-size:12.5px}
+.wrap{max-width:1180px;margin:0 auto;padding:18px 20px 60px;display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:18px;align-items:start}
+.hd h2{font-size:20px;margin:2px 0}.mono{font-family:ui-monospace,Menlo,monospace;font-size:12px}
+.grp{font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);margin:18px 0 6px}
+.grp:first-child{margin-top:0}
+.pt{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1.2fr) minmax(0,1.3fr) 92px;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--line);font-size:13px}
+.pt.h{border-top:0;padding-top:0;font-size:11.5px;color:var(--mute);font-weight:600}
+.pt .exp{font-weight:600}.pt .exp small{display:block;font-weight:400;color:var(--mute)}
+.pt input,.pt select{padding:7px 9px;font-size:13px}
+.res{font-size:12px;font-weight:700;border-radius:99px;padding:3px 8px;text-align:center}
+.res.ok{background:var(--okbg);color:var(--ok)}.res.ko{background:var(--kobg);color:var(--ko)}.res.na{background:var(--gray);color:var(--mute)}
+.pt.bad{background:linear-gradient(90deg,#fde8e4 0,transparent 60%)}
+.side{position:sticky;top:70px}
+.score{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;text-align:center}
+.score div{background:var(--bg);border-radius:10px;padding:10px 4px}.score b{display:block;font-size:22px}
+.score .k b{color:var(--ko)}.score .o b{color:var(--ok)}
+.side textarea{width:100%;font:inherit;font-size:12.5px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;min-height:110px}
+.side label{margin-top:10px}.side .btn{width:100%;margin-top:8px;padding:11px}
+.file{display:flex;align-items:center;gap:10px;background:var(--bg);border-radius:10px;padding:10px 12px;font-size:13px;margin-top:12px}.file i{width:30px;height:38px;border-radius:4px;background:#fff;border:1px solid var(--line);display:grid;place-items:center;font-style:normal;font-size:10px;font-weight:700;color:var(--ko)}
+.lnk{background:none;border:0;padding:0;color:var(--accent);font:inherit;font-weight:600;cursor:pointer}
+@media(max-width:1000px){.wrap{grid-template-columns:1fr}.side{position:static}.pt{grid-template-columns:1fr 1fr}.pt.h{display:none}}
+</style></head><body>
+<div class="top"><a class="logo" href="/" title="Accueil" style="color:#fff;text-decoration:none"><i></i>Nova Pro <small>· Console formaliste · récapitulatif des statuts</small></a><span><a href="/">Accueil</a> · <a id="back" href="/agent">‹ Retour au dossier</a></span></div>
+<div class="wrap"><div id="main"><div class="card sub">Chargement…</div></div><div id="side" class="side"></div></div>
+<div id="toast"></div>
+<script>
+const $=s=>document.querySelector(s);
+const esc=v=>String(v??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const api=(p,o)=>fetch('/api/'+p,o&&{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(o)}).then(r=>r.json());
+const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2600)};
+const capE=x=>(x/100).toLocaleString('fr-FR',{style:'currency',currency:'EUR'});
+const norm=s=>String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();
+// Même règle que le contrôle côté client : ≥ 80 % des mots attendus retrouvés
+const same=(exp,read)=>{const d=norm(exp).split(' ').filter(w=>w.length>1),f=new Set(norm(read).split(' '));return !d.length||d.filter(w=>f.has(w)).length/d.length>=.8};
+const absent=v=>/^(absent|non mentionn|aucun|neant)/.test(norm(v));
+const num=v=>{const n=Number(String(v).replace(/\s|€/g,'').replace(',','.'));return isFinite(n)&&String(v).trim()!==''?Math.round(n*100):null};
+const id=Number(new URLSearchParams(location.search).get('id'));
+let V=null,X=null,doc=null;
+
+/* Points de contrôle : chacun compare l'attendu (dossier) à ce que le formaliste lit sur les statuts.
+   type : text (comparaison souple), exact (identique), money (montant), yn (oui / non). code : motif de refus si écart. */
+function points(){const C=X,tot=C.total_cents,min=Math.round(tot*C.min_release);
+ const P=[
+  ['Identité de la société'],
+  {k:'name',l:'Dénomination sociale',exp:C.company_name,t:'name',code:'CompanyNameMismatch',fix:r=>`la dénomination indiquée est « ${r} », celle du dossier est « ${C.company_name} »`},
+  {k:'form',l:'Forme juridique',exp:C.legal_form,t:'select',opts:['SAS','SASU','SARL','EURL','SA','SCI'],code:'CompanyNameMismatch',fix:r=>`la forme juridique indiquée est ${r}, le dossier indique ${C.legal_form}`},
+  {k:'seat',l:'Siège social',exp:C.address,t:'text',code:'InvalidAddress',fix:r=>`le siège indiqué (« ${r} ») diffère de l’adresse de domiciliation du dossier (« ${C.address} »)`},
+  ['Capital social'],
+  {k:'capital',l:'Montant du capital (en chiffres)',exp:capE(tot),sub:'Somme des apports déclarés',t:'money',want:tot,code:'DeclaredAmountMismatch',fix:r=>`le capital indiqué est de ${r} €, le dossier prévoit ${capE(tot)}`},
+  {k:'letters',l:'Montant en lettres concordant',exp:'Oui',sub:'Les chiffres et les lettres disent la même chose',t:'yn',code:'DeclaredAmountMismatch',fix:()=>`le montant du capital en lettres ne correspond pas au montant en chiffres`},
+  {k:'released',l:'Capital libéré à la constitution',exp:capE(tot),sub:`Fonds déposés · minimum légal ${Math.round(C.min_release*100)} % (${capE(min)})`,t:'money',want:tot,min,code:'DeclaredAmountMismatch',fix:r=>`le montant libéré indiqué (${r} €) ne correspond pas aux fonds déposés (${capE(tot)})`},
+  ['Associés et répartition'],
+  ...C.shareholders.map((s,i)=>({k:'sh'+i,l:s.name,sub:'Apport en numéraire',exp:capE(s.amount_cents),t:'money',want:s.amount_cents,code:'DeclaredAmountMismatch',fix:r=>`l’apport de ${s.name} est de ${r} € dans les statuts, ${capE(s.amount_cents)} dans le dossier`})),
+  {k:'nomore',l:'Aucun autre associé',exp:`${C.shareholders.length} associé${C.shareholders.length>1?'s':''}, pas un de plus`,t:'yn',code:'DeclaredAmountMismatch',fix:()=>`la liste des associés des statuts ne correspond pas à celle du dossier (${C.shareholders.map(s=>s.name).join(', ')})`},
+  {k:'sum',l:'Total des apports = capital',exp:'Calculé',sub:'Somme des apports lus ci-dessus',t:'auto',code:'DeclaredAmountMismatch',fix:()=>`la somme des apports ne correspond pas au capital social`},
+  ['Dépôt des fonds'],
+  {k:'bank',l:'Établissement dépositaire',exp:C.bank.name,t:'text',code:'UnacceptableDocument',fix:r=>r&&!absent(r)?`l’établissement dépositaire indiqué (« ${r} ») n’est pas le bon : indiquez ${C.bank.name}`:`l’établissement dépositaire des fonds n’est pas mentionné : indiquez ${C.bank.name}`},
+  {k:'bankaddr',l:'Adresse de la banque',exp:C.bank.address,t:'text',code:'UnacceptableDocument',fix:r=>absent(r)?`l’adresse de l’établissement dépositaire n’est pas mentionnée : indiquez ${C.bank.address}`:`l’adresse de l’établissement dépositaire doit être ${C.bank.address}`},
+  ['Formalités'],
+  {k:'pres',l:'Président / gérant désigné',exp:C.president,sub:'Dans les statuts ou un acte séparé',t:'text',code:'UnacceptableDocument',fix:r=>`le dirigeant désigné (« ${r} ») ne correspond pas au fondateur du dossier (${C.president})`},
+  {k:'signed',l:'Signés par tous les associés',exp:'Oui',t:'yn',code:'MissingSignature',fix:()=>`les statuts doivent être signés par chaque associé`},
+  {k:'dated',l:'Datés',exp:'Oui',t:'yn',code:'MissingSignature',fix:()=>`les statuts doivent être datés`},
+  {k:'object',l:'Objet social et durée renseignés',exp:'Oui',sub:'Durée de 99 ans au plus',t:'yn',code:'UnacceptableDocument',fix:()=>`l’objet social ou la durée de la société manquent`},
+  {k:'complete',l:'Document complet et lisible',exp:'Oui',sub:'Toutes les pages, scan net',t:'yn',code:'BadDocumentQuality',fix:()=>`le document est incomplet ou illisible : renvoyez toutes les pages, scan net`},
+ ];return P}
+const READ={};
+function result(p){const r=READ[p.k]??'';
+ if(p.t=='auto'){const vals=X.shareholders.map((s,i)=>num(READ['sh'+i]??'')),cap=num(READ.capital??'');if(vals.some(v=>v==null)||cap==null)return 'na';return vals.reduce((a,b)=>a+b,0)==cap?'ok':'ko'}
+ if(r==='')return 'na';
+ if(p.t=='yn')return r=='oui'?'ok':'ko';
+ if(p.t=='select')return r==p.exp?'ok':'ko';
+ if(p.t=='money'){const n=num(r);if(n==null)return 'na';return n==p.want&&(!p.min||n>=p.min)?'ok':'ko'}
+ if(p.t=='name'){const strip=x=>norm(x).split(' ').filter(w=>!['sas','sasu','sarl','eurl','sa','sci'].includes(w)).join(' ');return strip(p.exp)==strip(r)?'ok':'ko'}  // la forme juridique a son propre point
+ return same(p.exp,r)?'ok':'ko'}
+function input(p){const v=esc(READ[p.k]??''),a=`data-k="${p.k}" aria-label="${esc(p.l)} lu sur les statuts"`;
+ if(p.t=='auto'){const vals=X.shareholders.map((s,i)=>num(READ['sh'+i]??''));return `<span class="sub">${vals.every(x=>x!=null)?capE(vals.reduce((a,b)=>a+b,0)):'—'}</span>`}
+ if(p.t=='yn')return `<select ${a}><option value="">—</option><option value="oui" ${v=='oui'?'selected':''}>Oui</option><option value="non" ${v=='non'?'selected':''}>Non</option></select>`;
+ if(p.t=='select')return `<select ${a}><option value="">—</option>${p.opts.map(o=>`<option ${v==o?'selected':''}>${o}</option>`).join('')}</select>`;
+ return `<input ${a} value="${v}" placeholder="${p.t=='money'?'Montant lu (€)':'Texte lu, ou « absent »'}" ${p.t=='money'?'inputmode="decimal"':''}>`}
+const RL={ok:'Conforme',ko:'Écart',na:'À vérifier'};
+
+async function load(){V=await api('capital?id='+id);X=V.articlesControl;doc=V.documents?.find(d=>d.type=='ArticlesOfIncorporation');$('#back').href='/agent?id='+id;
+ if(!X){$('#main').innerHTML='<div class="card">Ce dossier utilise des statuts générés par Nova Pro : pas de contrôle manuel nécessaire.</div>';return}
+ draw()}
+function draw(){const ae=document.activeElement,f=ae?.dataset?.k,pos=ae?.selectionStart;const c=V.case,P=points(),rows=P.filter(p=>!Array.isArray(p)),R=rows.map(p=>[p,result(p)]);
+ const n={ok:R.filter(x=>x[1]=='ok').length,ko:R.filter(x=>x[1]=='ko').length,na:R.filter(x=>x[1]=='na').length};
+ const open=doc.status=='Uploaded';
+ $('#main').innerHTML=`<div class="card"><div class="hd"><div class="sub mono">${esc(c.ref)} · statuts fournis par le client</div><h2>${esc(c.company_name)}</h2>
+   <div class="file"><i>PDF</i><div><b>${esc(doc.filename||'statuts.pdf')}</b><div class="sub">${open?'Reçu, à contrôler':'Statut : '+esc(doc.status_label)} · maquette : fichier non conservé</div></div></div></div></div>
+  <div class="card"><div class="pt h"><span>Point de contrôle</span><span>Attendu (dossier)</span><span>Lu sur les statuts</span><span>Résultat</span></div>
+  ${P.map(p=>Array.isArray(p)?`<div class="grp">${esc(p[0])}</div>`:(()=>{const r=result(p);return `<div class="pt ${r=='ko'?'bad':''}"><span>${esc(p.l)}${p.sub?`<div class="sub">${esc(p.sub)}</div>`:''}</span><span class="exp">${esc(p.exp)}</span><span>${input(p)}</span><span class="res ${r}">${RL[r]}</span></div>`})()).join('')}</div>`;
+ const fails=R.filter(x=>x[1]=='ko'),note=fails.map(([p])=>'- '+p.fix(READ[p.k]??'')).join('\n');
+ const reasons=Object.entries(V.reasonDetails),code=fails[0]?.[0].code||'UnacceptableDocument';
+ $('#side').innerHTML=`<div class="card"><h3>Synthèse</h3><div class="score"><div class="o"><b>${n.ok}</b>conformes</div><div class="k"><b>${n.ko}</b>écarts</div><div><b>${n.na}</b>à vérifier</div></div>
+  <div class="sub">Récapitulatif des points vérifiés avant l’envoi. ${n.ko?`<b style="color:var(--ko)">${n.ko} écart${n.ko>1?'s':''} relevé${n.ko>1?'s':''}</b> : à signaler au client avant transmission.`:''}</div>
+  <div class="warn" style="margin-top:12px">La validation ou le refus des statuts relève de Swan. Statut actuel : <b>${esc(doc.status_label)}</b>.</div>
+  </div><div class="card"><h3>Rappel</h3><div class="sub">Le client a reçu ces consignes au dépôt : dénomination, siège, capital et répartition identiques au dossier, fonds déposés auprès de <b>${esc(X.bank.name)}</b>, ${esc(X.bank.address)}.</div></div>`;
+ if(f){const el=document.querySelector(`[data-k="${f}"]`);if(el){el.focus();if(el.tagName=='INPUT'&&pos!=null)el.setSelectionRange(pos,pos)}}}
+// Saisie : on recalcule la ligne sans perdre le focus
+document.addEventListener('input',e=>{const k=e.target.dataset.k;if(!k)return;READ[k]=e.target.value;redraw()});
+document.addEventListener('change',e=>{const k=e.target.dataset.k;if(!k)return;READ[k]=e.target.value;redraw()});
+let t=null;const redraw=()=>{clearTimeout(t);t=setTimeout(draw,250)};
+load();
+</script></body></html>
